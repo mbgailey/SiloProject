@@ -13,10 +13,13 @@ public class CreateBackground3 : MonoBehaviour {
     float zPos = 1.2f;
     //float edgePadding = 0.05f;
 
-    float maxBumpiness = 0.1f;
+    float maxBumpiness = 0.2f;
 
     CreateWorld2 createWorld;
     public List<int> publicTriangles;
+    public List<int> bottomTriangleState = new List<int>();
+    public List<int> topTriangleState = new List<int>();
+    public List<int> nodeCounts = new List<int>();
 
     public LayerMask backgroundLayer;
 
@@ -31,7 +34,7 @@ public class CreateBackground3 : MonoBehaviour {
     {
         //Create list of striation elevations within the min and max elevations. Return as local elevations with respect to zero
         List<float> striationList = new List<float>();
-        float buffer = 3.1f;    //Add buffer to max and min to ensure that all points will be within range
+        float buffer = 5.1f;    //Add buffer to max and min to ensure that all points will be within range
         float zeroElev = floorStart.y;
 
         float[] points = new float[floorEndPoints.Count+1];
@@ -82,11 +85,14 @@ public class CreateBackground3 : MonoBehaviour {
 
     List<Vector3> CreateNodesBetween(Vector3 floorPos, Vector3 ceilingPos, List<float> masterStriationList, float currentPosX, float absoluteElevRef)
     {
+        Debug.Log("NodesBetween: floorPos: " + floorPos + "ceilingPos: " + ceilingPos);
+        
         //Node positions returned are with respect to floorPos as 0,0,0
         List<Vector3> nodesList = new List<Vector3>();
+        float padding = 0.25f;
 
-        float upperPos = ceilingPos.y;
-        float lowerPos = floorPos.y;
+        float upperPos = ceilingPos.y + padding;
+        float lowerPos = floorPos.y - padding;
 
         float radius = (upperPos - lowerPos)/2;
 
@@ -111,15 +117,15 @@ public class CreateBackground3 : MonoBehaviour {
         foreach (float yPos in yPosList)
         {
             float y = Mathf.Abs(center - yPos);
-            
-            float z = 0f;
+
+            float z = zPos;
             if (count == 0 || count == yPosList.Count - 1 || y == radius)
             {
-                z = 0f;
+                z = zPos;
             }
             else
             {
-                z = Mathf.Sqrt(radius * radius - y * y);
+                z = zPos + Mathf.Sqrt(radius * radius - y * y) + SelectBumpiness();
             }    
             zPosList.Add(z);
             count++;
@@ -127,7 +133,16 @@ public class CreateBackground3 : MonoBehaviour {
 
         for (int i = 0; i < yPosList.Count; i++)
         {
-            Vector3 pos = new Vector3(currentPosX, yPosList[i], zPosList[i]);
+            Vector3 pos;
+            if (i == 0 || i == yPosList.Count - 1)
+            {
+                pos = new Vector3(currentPosX, yPosList[i], zPosList[i]);
+            }
+            else
+            {
+                pos = new Vector3(currentPosX, yPosList[i] + SelectBumpiness(), zPosList[i]);
+            }
+            
             nodesList.Add(pos);
 
             //Debug.Log("Node added: " + nodesList[i]);
@@ -143,14 +158,38 @@ public class CreateBackground3 : MonoBehaviour {
         int refNodeB = refNodeA + nodeCounts[1]; //Lowest node at next index
         int refNodeAmod = refNodeA; //
         int refNodeBmod = refNodeB;
-        int squaresNeeded;
+        int squaresNeeded = nodeCounts[0] - 1;
 
         //'i' is index of each column of nodes (horizontal index)
         //'j' is index of each row of nodes (vertical index)
         for (int i = 0; i < nodeCounts.Count - 1; i++)
         {
             Debug.Log("i: " + i + " refNodeA: " + refNodeA + " refNodeB: " + refNodeB);
-            squaresNeeded = Mathf.Min(nodeCounts[i], nodeCounts[i+1]) - 1;
+            
+            int triEffect = 0;
+ 
+            if (topState[i + 1] == 1 && bottomState[i + 1] == -1)
+            {
+                triEffect = 0;
+            }
+            else if (topState[i + 1] == -1 && bottomState[i + 1] == -1)
+            {
+                triEffect = -1;
+            }
+            else if (topState[i + 1] == 1 && bottomState[i + 1] == 1)
+            {
+                triEffect = -1;
+            }
+            else
+            {
+                triEffect = 0;
+            }
+            
+            squaresNeeded = Mathf.Min(nodeCounts[i], nodeCounts[i+1]) - 1 + triEffect;
+
+            //squaresNeeded = Mathf.Min(nodeCounts[i], nodeCounts[i + 1]) - Mathf.Abs(bottomState[i + 1]) - Mathf.Abs(topState[i + 1]);
+
+            //squaresNeeded += topState[i + 1]
 
             //Make single triangle at bottom if necessary
             if (bottomState[i + 1] == -1)
@@ -185,7 +224,7 @@ public class CreateBackground3 : MonoBehaviour {
             {
                 triangles.Add(refNodeA + nodeCounts[i] - 1);
                 triangles.Add(refNodeB + nodeCounts[i + 1] - 1);
-                triangles.Add(refNodeB + nodeCounts[i] - 2);
+                triangles.Add(refNodeA + nodeCounts[i] - 2);
             }
             else if (topState[i + 1] == 1)
             {
@@ -195,7 +234,7 @@ public class CreateBackground3 : MonoBehaviour {
             }
 
             refNodeA = refNodeB;
-            refNodeB += nodeCounts[i];
+            refNodeB += nodeCounts[i+1];
 
             refNodeAmod = refNodeA;
             refNodeBmod = refNodeB;
@@ -219,9 +258,9 @@ public class CreateBackground3 : MonoBehaviour {
         //backObj.layer = (int)backgroundLayer;
         backObj.isStatic = true;
 
-        List<int> nodeCounts = new List<int>();
-        List<int> bottomTriangleState = new List<int>();
-        List<int> topTriangleState = new List<int>();
+        //List<int> nodeCounts = new List<int>();
+        //List<int> bottomTriangleState = new List<int>();
+        //List<int> topTriangleState = new List<int>();
 
         List<Vector3> verts = new List<Vector3>();
         List<int> tris = new List<int>();
@@ -244,8 +283,8 @@ public class CreateBackground3 : MonoBehaviour {
         //Add start point to the end point list. List now contains every point for floor and ceiling
         floorEndPoints.Insert(0, floorStartPos);
         ceilingEndPoints.Insert(0, ceilingStartPos);
-        floorSlopes.Insert(0,0f);    //Pad the end so that slope list is same length as endpoint list
-        ceilingSlopes.Insert(0,0f);
+        floorSlopes.Add(0f);    //Pad the end so that slope list is same length as endpoint list
+        ceilingSlopes.Add(0f);    //Pad the end so that slope list is same length as endpoint list
 
         Vector3 floorNode = floorStartPos;
         Vector3 ceilingNode = ceilingStartPos;
@@ -311,23 +350,24 @@ public class CreateBackground3 : MonoBehaviour {
             }
         }
 
-        int ct = 0;
-        foreach (Vector3 vert in verts)
-        {
-            GameObject marker = (GameObject)Instantiate(markerPrefab, vert, Quaternion.identity);
-            marker.GetComponentInChildren<TextMesh>().text = ct.ToString();
-            ct++;
-        }
+        //Use markers for debug only
+        //int ct = 0;
+        //foreach (Vector3 vert in verts)
+        //{
+        //    GameObject marker = (GameObject)Instantiate(markerPrefab, vert, Quaternion.identity);
+        //    marker.GetComponentInChildren<TextMesh>().text = ct.ToString();
+        //    ct++;
+        //}
 
-        //tris = CreateTriangles(nodeCounts, bottomTriangleState, topTriangleState);
+        tris = CreateTriangles(nodeCounts, bottomTriangleState, topTriangleState);
 
-        //mesh.vertices = verts.ToArray();
-        //mesh.triangles = tris.ToArray();
+        mesh.vertices = verts.ToArray();
+        mesh.triangles = tris.ToArray();
 
-        //mesh.RecalculateNormals();
-        //mesh.RecalculateBounds();
+        mesh.RecalculateNormals();
+        mesh.RecalculateBounds();
 
-        //ApplyBiomeMaterial(backObj, biomeInd);
+        ApplyBiomeMaterial(backObj, biomeInd);
 	}
 
     float SelectBumpiness()
