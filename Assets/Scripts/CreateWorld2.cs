@@ -54,14 +54,14 @@ public class CreateWorld2 : MonoBehaviour {
     public GameObject marker;
     public GameObject line;
 
-    CreateBackground3 createBackground;
+    CreateBackground4 createBackground;
     CreateWaterMesh createWater;
 
     float waterElevation;
 
 	// Use this for initialization
 	void Start () {
-        createBackground = this.GetComponent<CreateBackground3>();
+        createBackground = this.GetComponent<CreateBackground4>();
         createWater = this.GetComponent<CreateWaterMesh>();
         waterElevation = createWater.globalWaterElevation;
 

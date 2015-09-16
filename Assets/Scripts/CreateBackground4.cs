@@ -2,18 +2,18 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class CreateBackground3 : MonoBehaviour {
+public class CreateBackground4 : MonoBehaviour {
     //Create curved background for tunnel section
     float striationHeight = 0.4f;
     float striationAngle = 0f;
     //float localStriationRef = 0.45f;
 
     float pieceLength = 1f;
-    int nodesPerLength = 3;
-    float zPos = 1.2f;
+    int nodesPerLength = 2;
+    float zPos = 0.5f;
     //float edgePadding = 0.05f;
 
-    float maxBumpiness = 0.2f;
+    //float maxBumpiness = 0.2f;
 
     CreateWorld2 createWorld;
     public List<int> publicTriangles;
@@ -91,7 +91,7 @@ public class CreateBackground3 : MonoBehaviour {
         
         //Node positions returned are with respect to floorPos as 0,0,0
         List<Vector3> nodesList = new List<Vector3>();
-        float padding = 0.25f;
+        float padding = 0.3f;
 
         float upperPos = ceilingPos.y + padding;
         float lowerPos = floorPos.y - padding;
@@ -127,7 +127,7 @@ public class CreateBackground3 : MonoBehaviour {
             }
             else
             {
-                z = zPos + Mathf.Sqrt(radius * radius - y * y) + SelectBumpiness();
+                z = zPos + Mathf.Sqrt(radius * radius - y * y) + SelectBumpiness(0.4f);
             }    
             zPosList.Add(z);
             count++;
@@ -142,7 +142,7 @@ public class CreateBackground3 : MonoBehaviour {
             }
             else
             {
-                pos = new Vector3(currentPosX, yPosList[i] + SelectBumpiness(), zPosList[i]);
+                pos = new Vector3(currentPosX, yPosList[i] + SelectBumpiness(0.1f), zPosList[i]);
             }
             
             nodesList.Add(pos);
@@ -153,7 +153,7 @@ public class CreateBackground3 : MonoBehaviour {
         return nodesList;
     }
 
-    List<int> CreateTriangles(List<int> nodeCounts, List<int> bottomState, List<int> topState, List<Vector3> vertices)
+    List<int> CreateTriangles(List<int> nodeCounts, List<int> bottomState, List<int> topState)
     {
         List<int> triangles = new List<int>();
         int refNodeA = 0; //Lowest node at current index
@@ -214,13 +214,30 @@ public class CreateBackground3 : MonoBehaviour {
             //Create 2 normal triangles for each square that's needed 
             for (int j = 0; j < squaresNeeded; j++)
             {
-                triangles.Add(refNodeAmod + j);
-                triangles.Add(refNodeAmod + j + 1);
-                triangles.Add(refNodeBmod + j);
+                int ind1 = vertIndex;
+                vertices.Add(vertices[refNodeAmod + j]);
+                triangles.Add(ind1);
+                vertIndex++;
 
-                triangles.Add(refNodeAmod + j + 1);
-                triangles.Add(refNodeBmod + j + 1);
-                triangles.Add(refNodeBmod + j);
+                int ind2 = vertIndex;
+                vertices.Add(vertices[refNodeAmod + j + 1]);
+                triangles.Add(ind2);
+                vertIndex++;
+
+                int ind3 = vertIndex;
+                vertices.Add(vertices[refNodeBmod + j]);
+                triangles.Add(ind3);
+                vertIndex++;
+
+                
+                triangles.Add(ind2);
+
+                int ind4 = vertIndex;
+                vertices.Add(vertices[refNodeBmod + j + 1]);
+                triangles.Add(ind4);
+                vertIndex++;
+
+                triangles.Add(ind3);
             }
 
             //Make single triangle at top if necessary
@@ -363,9 +380,11 @@ public class CreateBackground3 : MonoBehaviour {
         //    ct++;
         //}
 
-        tris = CreateTriangles(nodeCounts, bottomTriangleState, topTriangleState, verts);
+        vertices = new List<Vector3>(verts);
 
-        mesh.vertices = verts.ToArray();
+        tris = CreateTriangles(nodeCounts, bottomTriangleState, topTriangleState);
+
+        mesh.vertices = vertices.ToArray();
         mesh.triangles = tris.ToArray();
 
         mesh.RecalculateNormals();
@@ -374,7 +393,7 @@ public class CreateBackground3 : MonoBehaviour {
         ApplyBiomeMaterial(backObj, biomeInd);
 	}
 
-    float SelectBumpiness()
+    float SelectBumpiness(float maxBumpiness)
     {
         float bump = 0f;
         bump = Random.Range(-maxBumpiness, maxBumpiness);
