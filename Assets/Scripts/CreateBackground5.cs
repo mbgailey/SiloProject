@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class CreateBackground4 : MonoBehaviour {
+public class CreateBackground5 : MonoBehaviour {
     //Create curved background for tunnel section
     float striationHeight = 0.4f;
     float striationAngle = 0f;
@@ -16,12 +16,18 @@ public class CreateBackground4 : MonoBehaviour {
     //float maxBumpiness = 0.2f;
 
     CreateWorld2 createWorld;
-    public List<int> publicTriangles;
-    //public List<int> bottomTriangleState = new List<int>();
-    //public List<int> topTriangleState = new List<int>();
-    //public List<int> nodeCounts = new List<int>();
 
-    //List<Vector3> vertices = new List<Vector3>();
+    //Lists are public for troubleshooting
+    [SerializeField]
+    List<int> publicTriangles;
+    [SerializeField]
+    List<int> bottomTriangleState = new List<int>();
+    [SerializeField]
+    List<int> topTriangleState = new List<int>();
+    [SerializeField]
+    List<int> nodeCounts = new List<int>();
+    [SerializeField]
+    List<Vector3> newVerts = new List<Vector3>();
 
     public LayerMask backgroundLayer;
 
@@ -29,7 +35,7 @@ public class CreateBackground4 : MonoBehaviour {
 
 	// Use this for initialization
 	void Awake () {
-        createWorld = this.GetComponent<CreateWorld2>();
+        createWorld = GameObject.Find("WorldCreator").GetComponent<CreateWorld2>();
 	}
 
     List<float> CreateMasterStriationList(Vector3 floorStart, Vector3 ceilingStart, List<Vector3> floorEndPoints, List<Vector3> ceilingEndPoints)
@@ -87,7 +93,7 @@ public class CreateBackground4 : MonoBehaviour {
 
     List<Vector3> CreateNodesBetween(Vector3 floorPos, Vector3 ceilingPos, List<float> masterStriationList, float currentPosX, float absoluteElevRef, float absoluteXRef)
     {
-        Debug.Log("NodesBetween: floorPos: " + floorPos + "ceilingPos: " + ceilingPos);
+        //Debug.Log("NodesBetween: floorPos: " + floorPos + "ceilingPos: " + ceilingPos);
         
         //Node positions returned are with respect to floorPos as 0,0,0
         List<Vector3> nodesList = new List<Vector3>();
@@ -168,7 +174,7 @@ public class CreateBackground4 : MonoBehaviour {
         //'j' is index of each row of nodes (vertical index)
         for (int i = 0; i < nodeCounts.Count - 1; i++)
         {
-            Debug.Log("i: " + i + " refNodeA: " + refNodeA + " refNodeB: " + refNodeB);
+            //Debug.Log("i: " + i + " refNodeA: " + refNodeA + " refNodeB: " + refNodeB);
             
             int triEffect = 0;
  
@@ -343,9 +349,9 @@ public class CreateBackground4 : MonoBehaviour {
         //backObj.layer = (int)backgroundLayer;
         backObj.isStatic = true;
 
-        List<int> nodeCounts = new List<int>();
-        List<int> bottomTriangleState = new List<int>();
-        List<int> topTriangleState = new List<int>();
+        //List<int> nodeCounts = new List<int>();
+        //List<int> bottomTriangleState = new List<int>();
+        //List<int> topTriangleState = new List<int>();
 
         List<Vector3> verts = new List<Vector3>();
         List<int> tris = new List<int>();
@@ -451,7 +457,7 @@ public class CreateBackground4 : MonoBehaviour {
             flip = true;
         }
 
-        List<Vector3> newVerts = new List<Vector3>();
+        newVerts = new List<Vector3>();
 
         CreateTriangles(out tris, out newVerts, verts, nodeCounts, bottomTriangleState, topTriangleState, flip);
 

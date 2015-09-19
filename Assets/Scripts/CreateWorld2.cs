@@ -38,10 +38,10 @@ public class CreateWorld2 : MonoBehaviour {
     //Branch Characteristics
     float branchFrequency = 0.1f;    //Set chance to create a branchfloat branchFrequency = 0.1f;    //Set chance to create a branch
     Vector3 tunnelTendDist = new Vector3(0.10f, 0.6f, 1.0f); //Set distribution of tunnels between up and down and normal. Set as breakpoints between 0 and 1
-    int maxBranches = 1;
+    int maxBranches = 2;
     float tunnelHeight = 1f;
-    int minTunnelLength = 10;
-    int maxTunnelLength = 20;
+    int minTunnelLength = 20;
+    int maxTunnelLength = 50;
     float maxAngle = 40f;
     float pieceThickness = 0.4f;
 
@@ -54,14 +54,16 @@ public class CreateWorld2 : MonoBehaviour {
     public GameObject marker;
     public GameObject line;
 
-    CreateBackground4 createBackground;
+    //CreateBackground5 createBackground;
+    CreateShaftBackground createShaftBackground;
     CreateWaterMesh createWater;
 
     float waterElevation;
 
 	// Use this for initialization
 	void Start () {
-        createBackground = this.GetComponent<CreateBackground4>();
+        //createBackground = this.GetComponent<CreateBackground4>();
+        createShaftBackground = this.GetComponent<CreateShaftBackground>();
         createWater = this.GetComponent<CreateWaterMesh>();
         waterElevation = createWater.globalWaterElevation;
 
@@ -91,8 +93,8 @@ public class CreateWorld2 : MonoBehaviour {
         //Initialize
         Vector3 floorStartPos;
         Vector3 ceilingStartPos;
-        Vector3 floorEndPos;
-        Vector3 ceilingEndPos;
+        Vector3 floorEndPos = new Vector3();
+        Vector3 ceilingEndPos = new Vector3();;
         Vector3 tunnelFloorStart;
         Vector3 tunnelCeilingStart;
         List<Vector3> floorEndPoints = new List<Vector3>();
@@ -106,6 +108,9 @@ public class CreateWorld2 : MonoBehaviour {
         FloorPieces.transform.SetParent(Tunnel.transform);
         CeilingPieces.transform.SetParent(Tunnel.transform);
         BackgroundPieces.transform.SetParent(Tunnel.transform);
+        BackgroundPieces.AddComponent<CreateBackground5>();
+        CreateBackground5 createBackground;
+        createBackground = BackgroundPieces.GetComponent<CreateBackground5>();
 
         floorStartPos = startPos;
         //floorPos.x += 0.5f * direction;
@@ -206,7 +211,7 @@ public class CreateWorld2 : MonoBehaviour {
                     
                 }
                 floorSlope = Mathf.Tan(floorAngle * Mathf.Deg2Rad);
-                floorEndPos.y += floorSlope * pieceLength;   //Account for offset of next piece. Should now be y pos of primary surface at end of this piece
+                
             }
 
             else //If shaftDown
@@ -214,6 +219,7 @@ public class CreateWorld2 : MonoBehaviour {
                 floorAngle = 0f;
             }
             floorSlope = Mathf.Tan(floorAngle * Mathf.Deg2Rad);
+            floorEndPos.y += floorSlope * pieceLength;   //Account for offset of next piece. Should now be y pos of primary surface at end of this piece
 
             if (!shaftUp)
             {
@@ -234,7 +240,7 @@ public class CreateWorld2 : MonoBehaviour {
                         endPosTest = ceilingStartPos.y;
                         ceilingAngle = SelectNextPieceAngle(vertTend);  //Select an angle for this piece
                         ceilingSlope = Mathf.Tan(ceilingAngle * Mathf.Deg2Rad);
-                        endPosTest += ceilingSlope * pieceLength * direction; //Should now be y pos of end of ceiling piece
+                        endPosTest += ceilingSlope * pieceLength; //Should now be y pos of end of ceiling piece
                         //Check where yPosTest is if having problems
 
                         float ht = endPosTest - floorEndPos.y; //Calculate clearance height. Should be height between end points of floor and ceiling
@@ -458,17 +464,15 @@ public class CreateWorld2 : MonoBehaviour {
             {
                 //bottomPos.y += yOffsets[floorInd] * direction; //Account for offset of last piece that was placed
                 //bottomInd = 2;
-                Instantiate(marker, bottomPos, Quaternion.identity);
+                //Instantiate(marker, bottomPos, Quaternion.identity);
             }
 
             if (shaftUp)
             {
                 //topPos.y += yOffsets[ceilingInd] * direction; //Account for offset of last piece that was placed
                 //topInd = 2;
-                Instantiate(marker, topPos, Quaternion.identity);
+                //Instantiate(marker, topPos, Quaternion.identity);
             }
-
-            
 
             //Create floor if not doing a shaft
             if (!shaftDown)
@@ -478,7 +482,7 @@ public class CreateWorld2 : MonoBehaviour {
                 Vector3 meshStart = new Vector3(-pieceLength / 2f * direction, (floorStartPos.y - floorEndPos.y) / 2f, 0f);
                 floorObj = (GameObject)Instantiate(tunnelPiecePrefab, objLoc, Quaternion.identity);
                 floorObj.GetComponent<CreatePieceMesh>().InitializePiece(floorAngle, meshStart, direction, -1, pieceThickness, pieceThickness, 2.0f, biomeMat);
-                Renderer[] rendArray = floorObj.gameObject.GetComponentsInChildren<Renderer>();
+                //Renderer[] rendArray = floorObj.gameObject.GetComponentsInChildren<Renderer>();
                 //foreach (Renderer rend in rendArray)
                 //{
                 //    rend.material = biomeMat;
@@ -502,7 +506,7 @@ public class CreateWorld2 : MonoBehaviour {
                 Vector3 meshStart = new Vector3(-pieceLength / 2f * direction, (ceilingStartPos.y - ceilingEndPos.y) / 2f, 0f);
                 ceilingObj = (GameObject)Instantiate(tunnelPiecePrefab, objLoc, Quaternion.identity);
                 ceilingObj.GetComponent<CreatePieceMesh>().InitializePiece(ceilingAngle, meshStart, direction, 1, pieceThickness, pieceThickness, 2.0f, biomeMat);
-                Renderer[] rendArray = ceilingObj.gameObject.GetComponentsInChildren<Renderer>();
+                //Renderer[] rendArray = ceilingObj.gameObject.GetComponentsInChildren<Renderer>();
                 //foreach (Renderer rend in rendArray)
                 //{
                 //    rend.material = biomeMat;
@@ -537,17 +541,51 @@ public class CreateWorld2 : MonoBehaviour {
             ceilingStartPos = ceilingEndPos;
             
         }
-    EndTunnelActions:
+        
+        EndTunnelActions:
         //createWater.CreateWaterBody(waterQuads, waterSurface, direction);
+
+        float endHt = ceilingEndPos.y - floorEndPos.y;
+        int endPieceCount = (int)(endHt / pieceLength) + 1;
+
+        for (int i = 0; i < endPieceCount; i++)
+        {
+            Vector3 objLoc = floorEndPos;
+            objLoc.y += i * pieceLength + pieceLength / 2 - 0.2f;
+
+            Vector3 meshStart = new Vector3(-pieceLength / 2, 0f, 0f); //Mesh start is relative to instantiated object
+
+            float rotation;
+            if (direction == 1)   //If up shaft then end will be ceiling piece
+            {
+                rotation = -90f;
+            }
+            else
+            {
+                rotation = 90f;
+            }
+            GameObject thisObj = (GameObject)Instantiate(tunnelPiecePrefab, objLoc, Quaternion.identity);
+            thisObj.GetComponent<CreatePieceMesh>().InitializePiece(0f, meshStart, 1, 1, 0.2f, 0.2f, 2.0f, biomeMat);    //Create a 0 degree piece with direction of 1 that will be turned by 90 degrees to become vertical piece
+            //Renderer[] rendArray = thisObj.gameObject.GetComponentsInChildren<Renderer>();
+            //foreach (Renderer rend in rendArray)
+            //{
+            //    rend.material = biomeMat;
+            //}
+            thisObj.transform.Rotate(0f, 0f, rotation);
+
+            thisObj.transform.SetParent(FloorPieces.transform);
+        }
+
 
         createBackground.PlaceBackground(tunnelFloorStart, tunnelCeilingStart, floorEndPoints, floorSlopeList, ceilingEndPoints, ceilingSlopeList, direction, biomeInd, BackgroundPieces);
 
-        return;
+        //return;
 	}
 
     //Generate a vertical shafts
     void GenerateShaft(Vector3 startPos, int vertDir, int horizDir, int biomeInd)
-    {
+    {      
+        
         //Initialize
         bool branchAllowed = false;
         int branchCoolTimer = 0;
@@ -560,6 +598,12 @@ public class CreateWorld2 : MonoBehaviour {
         GameObject Shaft = new GameObject("Shaft");
         GameObject ShaftPieces = new GameObject("ShaftPieces");
         ShaftPieces.transform.SetParent(Shaft.transform);
+        GameObject Background = new GameObject("Background");
+        Background.transform.SetParent(Shaft.transform);
+        
+        Background.AddComponent<CreateShaftBackground>();
+        CreateShaftBackground createBackground;
+        createBackground = Background.GetComponent<CreateShaftBackground>();
 
         Material biomeMat = biomeMaterials[biomeInd];
         
@@ -677,7 +721,7 @@ public class CreateWorld2 : MonoBehaviour {
                 Vector3 meshStart = new Vector3(-pieceLength / 2f, 0, 0f); //Mesh start is relative to instantiated object
                 GameObject thisObj = (GameObject)Instantiate(tunnelPiecePrefab, leftObjPos, Quaternion.identity);
                 thisObj.GetComponent<CreatePieceMesh>().InitializePiece(0f, meshStart, 1, -1, 0.2f, 0.2f, 2.0f, biomeMat);    //Create a 0 degree piece with direction of 1 that will be turned by 90 degrees to become vertical piece
-                Renderer[] rendArray = thisObj.gameObject.GetComponentsInChildren<Renderer>();
+                //Renderer[] rendArray = thisObj.gameObject.GetComponentsInChildren<Renderer>();
                 //foreach (Renderer rend in rendArray)
                 //{
                 //    rend.material = biomeMat;
@@ -704,7 +748,7 @@ public class CreateWorld2 : MonoBehaviour {
                 Vector3 meshStart = new Vector3(-pieceLength / 2f, 0, 0f); //Mesh start is relative to instantiated object
                 GameObject thisObj = (GameObject)Instantiate(tunnelPiecePrefab, rightObjPos, Quaternion.identity);
                 thisObj.GetComponent<CreatePieceMesh>().InitializePiece(0f, meshStart, 1, -1, 0.2f, 0.2f, 2.0f, biomeMat);    //Create a 0 degree piece with direction of 1 that will be turned by 90 degrees to become vertical piece
-                Renderer[] rendArray = thisObj.gameObject.GetComponentsInChildren<Renderer>();
+                //Renderer[] rendArray = thisObj.gameObject.GetComponentsInChildren<Renderer>();
                 //foreach (Renderer rend in rendArray)
                 //{
                 //    rend.material = biomeMat;
@@ -729,7 +773,7 @@ public class CreateWorld2 : MonoBehaviour {
             for (int i = 0; i < shaftWidth; i++)
             {
                 Vector3 endPos = leftShaftEndPos;
-                endPos.x += pieceLength/2 + pieceLength * i;
+                endPos.x += pieceLength/2f + pieceLength * i * horizDir;
                 endPos.y -= 0.2f * vertDir;
                 int pieceVertDir;
                 if (vertDir == 1)   //If up shaft then end will be ceiling piece
@@ -742,8 +786,8 @@ public class CreateWorld2 : MonoBehaviour {
                 }
                 Vector3 meshStart = new Vector3(-pieceLength / 2f * horizDir, 0, 0f); //Mesh start is relative to instantiated object
                 GameObject thisObj = (GameObject)Instantiate(tunnelPiecePrefab, endPos, Quaternion.identity);
-                thisObj.GetComponent<CreatePieceMesh>().InitializePiece(0f, meshStart, 1, pieceVertDir, 0.2f, 0.2f, 2.0f, biomeMat);    //Create a 0 degree piece with direction of 1 that will be turned by 90 degrees to become vertical piece
-                Renderer[] rendArray = thisObj.gameObject.GetComponentsInChildren<Renderer>();
+                thisObj.GetComponent<CreatePieceMesh>().InitializePiece(0f, meshStart, horizDir, pieceVertDir, 0.2f, 0.2f, 2.0f, biomeMat);    //Create a 0 degree piece with direction of 1 that will be turned by 90 degrees to become vertical piece
+                //Renderer[] rendArray = thisObj.gameObject.GetComponentsInChildren<Renderer>();
                 //foreach (Renderer rend in rendArray)
                 //{
                 //    rend.material = biomeMat;
@@ -751,6 +795,21 @@ public class CreateWorld2 : MonoBehaviour {
 
                 thisObj.transform.SetParent(ShaftPieces.transform);
             }
+
+        Vector3 backgroundStartPos = startPos;
+        
+        //Always start background in bottom left corner for simplicity
+        if (horizDir == -1)
+        {
+            backgroundStartPos.x -= pieceLength * shaftWidth;
+        }
+
+        if (vertDir == -1)
+        {
+            backgroundStartPos.y -= pieceLength * shaftLength;
+        }
+
+        createBackground.PlaceBackground(backgroundStartPos, horizDir, vertDir, shaftLength, (float)shaftWidth * pieceLength, biomeInd);
     
     }
 

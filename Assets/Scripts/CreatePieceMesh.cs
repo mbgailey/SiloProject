@@ -72,7 +72,8 @@ public class CreatePieceMesh : MonoBehaviour {
         float length = pieceLength / Mathf.Cos(angleRad);
         coll.size = new Vector3(length, 0.1f, floorDepth);
         coll.center = new Vector3(0f, 0.05f * yDirection, 0.5f);
-        coll.transform.localRotation = Quaternion.Euler(0f, 0f, angle);
+        float colliderAngle = angle * xDirection;
+        coll.transform.localRotation = Quaternion.Euler(0f, 0f, colliderAngle);
     }
 
     void CreateCurtain()
