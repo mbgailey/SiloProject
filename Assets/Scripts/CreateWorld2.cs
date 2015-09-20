@@ -61,7 +61,7 @@ public class CreateWorld2 : MonoBehaviour {
         //createBackground = this.GetComponent<CreateBackground4>();
         createShaftBackground = this.GetComponent<CreateShaftBackground>();
         createWater = this.GetComponent<CreateWaterMesh>();
-        waterElevation = createWater.globalWaterElevation;
+        //waterElevation = createWater.globalWaterElevation;
 
         GenerateTunnel(new Vector3(0f, 0f, 0f), 1, SelectTunnelTendency());
         
