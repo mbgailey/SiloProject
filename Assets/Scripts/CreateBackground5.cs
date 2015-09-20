@@ -404,7 +404,7 @@ public class CreateBackground5 : MonoBehaviour {
                 floorNode = nodes[0];
                 ceilingNode = nodes[nodes.Count-1];
 
-                if (floorNode.y == prevFloorNode.y)
+                if (Mathf.Abs(floorNode.y - prevFloorNode.y) < 0.01)
                 {
                     bottomTriangleState.Add(0);
                 }
@@ -417,7 +417,7 @@ public class CreateBackground5 : MonoBehaviour {
                     bottomTriangleState.Add(1);
                 }
 
-                if (ceilingNode.y == prevCeilingNode.y)
+                if (Mathf.Abs(ceilingNode.y - prevCeilingNode.y) < 0.01)
                 {
                     topTriangleState.Add(0);
                 }

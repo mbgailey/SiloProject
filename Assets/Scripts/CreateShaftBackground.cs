@@ -131,7 +131,7 @@ public class CreateShaftBackground : MonoBehaviour {
         List<float> zListMod = new List<float>(zList);
 
         int listLength = xListMod.Count;
-        Debug.Log(listLength);
+        //Debug.Log(listLength);
         //Add random variation to all middle nodes. Keep end nodes the same
         for (int k = 1; k < listLength - 2; k = k + 2)
         {

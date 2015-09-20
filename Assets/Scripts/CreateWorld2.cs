@@ -11,10 +11,6 @@ public class CreateWorld2 : MonoBehaviour {
     GameObject floorObj;
     GameObject ceilingObj;
     float pieceLength = 1f;
-    float floorSlope = 0f;
-    float ceilingSlope = 0f;
-    float floorAngle = 0f;
-    float ceilingAngle = 0f;
     public LayerMask terrainLayer;
     enum TunnelTendency { up, down, normal };
 
@@ -38,8 +34,8 @@ public class CreateWorld2 : MonoBehaviour {
     //Branch Characteristics
     float branchFrequency = 0.1f;    //Set chance to create a branchfloat branchFrequency = 0.1f;    //Set chance to create a branch
     Vector3 tunnelTendDist = new Vector3(0.10f, 0.6f, 1.0f); //Set distribution of tunnels between up and down and normal. Set as breakpoints between 0 and 1
-    int maxBranches = 2;
-    float tunnelHeight = 1f;
+    int maxBranches = 15;
+    float tunnelHeight = 0.8f;
     int minTunnelLength = 20;
     int maxTunnelLength = 50;
     float maxAngle = 40f;
@@ -91,6 +87,10 @@ public class CreateWorld2 : MonoBehaviour {
 	void GenerateTunnel (Vector3 startPos, int direction, TunnelTendency vertTend) {
         
         //Initialize
+        float floorSlope = 0f;
+        float ceilingSlope = 0f;
+        float floorAngle = 0f;
+        float ceilingAngle = 0f;
         Vector3 floorStartPos;
         Vector3 ceilingStartPos;
         Vector3 floorEndPos = new Vector3();
@@ -115,7 +115,7 @@ public class CreateWorld2 : MonoBehaviour {
         floorStartPos = startPos;
         //floorPos.x += 0.5f * direction;
         ceilingStartPos = floorStartPos;
-        ceilingStartPos.y += 1f;
+        ceilingStartPos.y += tunnelHeight;
 
         tunnelFloorStart = floorStartPos;
         tunnelCeilingStart = ceilingStartPos;
@@ -210,7 +210,7 @@ public class CreateWorld2 : MonoBehaviour {
                     floorAngle = SelectNextPieceAngle(vertTend);
                     
                 }
-                floorSlope = Mathf.Tan(floorAngle * Mathf.Deg2Rad);
+                //floorSlope = Mathf.Tan(floorAngle * Mathf.Deg2Rad);
                 
             }
 
@@ -302,7 +302,15 @@ public class CreateWorld2 : MonoBehaviour {
             if (CheckForOverlap(floorStart, floorEnd, ceilingStart, ceilingEnd, floorEnd, ceilingEnd))
             {
                 Debug.Log("Found interference with tunnel placement #" + branchNum);
-                
+
+                //floorEndPoints.RemoveAt(floorEndPoints.Count-1);
+                //ceilingEndPoints.RemoveAt(floorEndPoints.Count - 1);
+                //floorSlopeList.RemoveAt(floorEndPoints.Count - 1);
+                //ceilingSlopeList.RemoveAt(floorEndPoints.Count - 1);
+
+                floorEndPos = floorStartPos;    //Set end point back to start and end tunnel there
+                ceilingEndPos = ceilingStartPos;
+
                 goto EndTunnelActions;
 
             }
@@ -445,34 +453,34 @@ public class CreateWorld2 : MonoBehaviour {
                 }
             }
 
-            if (shaftDown)
-            {
-                ////floorPos = prevFloorPos;
-            }
-            if (shaftUp)
-            {
-                ////ceilingPos = prevCeilingPos;
-            }
+            //if (shaftDown)
+            //{
+            //    ////floorPos = prevFloorPos;
+            //}
+            //if (shaftUp)
+            //{
+            //    ////ceilingPos = prevCeilingPos;
+            //}
 
-            //Place Background
-            Vector3 bottomPos = floorStartPos;
-            Vector3 topPos = ceilingStartPos;
-            float bottomAngle = floorAngle;
-            float topAngle = ceilingAngle;
+            ////Place Background
+            //Vector3 bottomPos = floorStartPos;
+            //Vector3 topPos = ceilingStartPos;
+            //float bottomAngle = floorAngle;
+            //float topAngle = ceilingAngle;
 
-            if (shaftDown)
-            {
-                //bottomPos.y += yOffsets[floorInd] * direction; //Account for offset of last piece that was placed
-                //bottomInd = 2;
-                //Instantiate(marker, bottomPos, Quaternion.identity);
-            }
+            //if (shaftDown)
+            //{
+            //    //bottomPos.y += yOffsets[floorInd] * direction; //Account for offset of last piece that was placed
+            //    //bottomInd = 2;
+            //    //Instantiate(marker, bottomPos, Quaternion.identity);
+            //}
 
-            if (shaftUp)
-            {
-                //topPos.y += yOffsets[ceilingInd] * direction; //Account for offset of last piece that was placed
-                //topInd = 2;
-                //Instantiate(marker, topPos, Quaternion.identity);
-            }
+            //if (shaftUp)
+            //{
+            //    //topPos.y += yOffsets[ceilingInd] * direction; //Account for offset of last piece that was placed
+            //    //topInd = 2;
+            //    //Instantiate(marker, topPos, Quaternion.identity);
+            //}
 
             //Create floor if not doing a shaft
             if (!shaftDown)
@@ -671,6 +679,11 @@ public class CreateWorld2 : MonoBehaviour {
                 //    leftShaftPos = rightShaftPos;
                 //    leftShaftPos.x += shaftWidth * horizDir;
                 //}
+
+                leftShaftEndPos.y -= pieceLength * vertDir;
+                rightShaftEndPos.y -= pieceLength * vertDir;
+
+                shaftLength = i;    //Re set shaft length to current iteration and goto end actions
 
                 goto EndShaftActions;
                 
