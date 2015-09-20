@@ -39,7 +39,7 @@ public class PlatformController : MonoBehaviour {
         Vector3 currentVel = rb.velocity;
         Vector3 locoForce = new Vector3(h, 0f, 0f);
 
-        Debug.Log(currentVel);
+        //Debug.Log(currentVel);
 
         rb.AddForce(locoForce, ForceMode.Force);
 

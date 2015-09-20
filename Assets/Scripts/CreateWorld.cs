@@ -412,7 +412,8 @@ public class CreateWorld : MonoBehaviour {
 
                 if (endWater)
                 {
-                    createWater.CreateWaterBody(waterQuads, waterSurface, direction);
+                    GameObject nothingObj2 = new GameObject();
+                    createWater.CreateWaterBody(waterQuads, waterSurface, direction, nothingObj2);
                 }
             }
 
@@ -500,7 +501,8 @@ public class CreateWorld : MonoBehaviour {
             
         }
     EndTunnelActions:
-        createWater.CreateWaterBody(waterQuads, waterSurface, direction);
+        GameObject nothingObj = new GameObject();
+        createWater.CreateWaterBody(waterQuads, waterSurface, direction, nothingObj);
         
         return;
 	}

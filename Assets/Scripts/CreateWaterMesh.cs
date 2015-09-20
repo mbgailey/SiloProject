@@ -5,12 +5,12 @@ using System.Collections.Generic;
 public class CreateWaterMesh : MonoBehaviour {
 
     public Material waterMaterial;
-    public Material waterSurfaceMaterial;
+    //public Material waterSurfaceMaterial;
     public GameObject waterSidePrefab;
     public GameObject waterTopPrefab;
 
     float frontSurfZ = -0.2f;
-    float backSurfZ = 0f;
+    float backSurfZ = 3f;
 
     public float globalWaterElevation = -2.0f;
 
@@ -29,8 +29,8 @@ public class CreateWaterMesh : MonoBehaviour {
         //gameObject.GetComponent<Renderer>().material = waterMaterial;
     }
 
-	// Update is called once per frame
-    public void CreateWaterBody(List<Vector2[]> quadList, List<Vector2> surfaceList, int direction) //Quadlist is list of y coordinates for each section
+
+    public void CreateWaterBody(List<Vector2[]> quadList, List<Vector2> surfaceList, int direction, GameObject parentObj) //Quadlist is list of y coordinates for each section
     {
 
         if (quadList.Count == 0)
@@ -49,6 +49,8 @@ public class CreateWaterMesh : MonoBehaviour {
         waterObj.AddComponent<MeshRenderer>();
         Mesh mesh = waterObj.GetComponent<MeshFilter>().mesh;
         //mesh.Clear();
+
+        waterObj.transform.parent = parentObj.transform;
 
         float xCoord = quadList[0][0].x;  //Initialize as the first x coordinate in the quad list
         int i = 0;
@@ -120,11 +122,11 @@ public class CreateWaterMesh : MonoBehaviour {
         waterObj.GetComponent<Renderer>().material = waterMaterial;
         //Debug.Log("mesh length: " + mesh.GetTriangles(0).ToString());
 
-        CreateTopSurfaces(surfaceList);
+        CreateTopSurfaces(surfaceList, parentObj);
 
 	}
 
-    void CreateTopSurfaces(List<Vector2> surfaceList)
+    void CreateTopSurfaces(List<Vector2> surfaceList, GameObject parentObj)
     {
         int surfaceCount = surfaceList.Count / 2;   //Surface list should come with pairs of vector2s defining the top water surface
 
@@ -148,6 +150,8 @@ public class CreateWaterMesh : MonoBehaviour {
             //waterSurfObj.AddComponent<MeshRenderer>();
             Mesh surfMesh = waterSurfObj.GetComponent<MeshFilter>().mesh;
             surfMesh.Clear();
+
+            waterSurfObj.transform.parent = parentObj.transform;
 
             verts.Add(new Vector3(surfaceList[k].x, surfaceList[k].y, frontSurfZ));
             verts.Add(new Vector3(surfaceList[k].x, surfaceList[k].y, backSurfZ));
