@@ -8,8 +8,10 @@ public class CreateWaterMesh : MonoBehaviour {
     //public Material waterSurfaceMaterial;
     public GameObject waterSidePrefab;
     public GameObject waterTopPrefab;
+    [SerializeField]
+    List<Vector3> troubleShootVerts = new List<Vector3>();
 
-    float frontSurfZ = -0.2f;
+    float frontSurfZ = -0.4f;
     float backSurfZ = 3f;
 
     public float globalWaterElevation = -2.0f;
@@ -66,8 +68,8 @@ public class CreateWaterMesh : MonoBehaviour {
                 //Add leftmost verts
                 verts.Add(new Vector3(quad[0].x, quad[0].y, frontSurfZ));
                 verts.Add(new Vector3(quad[1].x, quad[1].y, frontSurfZ));
-                uvs.Add(new Vector2(i, i)); //Might want to redo UVs to scale to correct height
-                uvs.Add(new Vector2(i, i+1));
+                //uvs.Add(new Vector2(i, i)); //Might want to redo UVs to scale to correct height
+                //uvs.Add(new Vector2(i, i+1));
                 normals.Add(Vector3.back);
                 normals.Add(Vector3.back);
             }
@@ -76,8 +78,8 @@ public class CreateWaterMesh : MonoBehaviour {
 
             verts.Add(new Vector3(quad[2].x, quad[2].y, frontSurfZ));
             verts.Add(new Vector3(quad[3].x, quad[3].y, frontSurfZ));
-            uvs.Add(new Vector2(i + 1, i)); //Might want to redo UVs to scale to correct height
-            uvs.Add(new Vector2(i + 1, i + 1));
+            //uvs.Add(new Vector2(i + 1, i)); //Might want to redo UVs to scale to correct height
+            //uvs.Add(new Vector2(i + 1, i + 1));
             normals.Add(Vector3.back);
             normals.Add(Vector3.back);
 
@@ -103,9 +105,20 @@ public class CreateWaterMesh : MonoBehaviour {
 
         for (int j = 0; j < verts.Count - 2; j++)
         {
-            tris.Add(j);
-            tris.Add(j + 1);
-            tris.Add(j + 2);
+            if (direction == 1)
+            {
+
+                tris.Add(j);
+                tris.Add(j + 1);
+                tris.Add(j + 2);
+            }
+            else
+            {
+                tris.Add(j);
+                tris.Add(j + 2);
+                tris.Add(j + 1);
+            }
+
         }
 
         //Debug.Log("tris length " + tris.Count);
@@ -122,11 +135,11 @@ public class CreateWaterMesh : MonoBehaviour {
         waterObj.GetComponent<Renderer>().material = waterMaterial;
         //Debug.Log("mesh length: " + mesh.GetTriangles(0).ToString());
 
-        CreateTopSurfaces(surfaceList, parentObj);
+        CreateTopSurfaces(surfaceList, parentObj, direction);
 
 	}
 
-    void CreateTopSurfaces(List<Vector2> surfaceList, GameObject parentObj)
+    void CreateTopSurfaces(List<Vector2> surfaceList, GameObject parentObj, int direction)
     {
         int surfaceCount = surfaceList.Count / 2;   //Surface list should come with pairs of vector2s defining the top water surface
 
@@ -138,7 +151,7 @@ public class CreateWaterMesh : MonoBehaviour {
         List<Vector2> uvs = new List<Vector2>();
         List<Vector3> normals = new List<Vector3>();
 
-        for (int k = 0; k < surfaceCount; k = k + 2)
+        for (int k = 0; k < surfaceList.Count; k = k + 2)
         {
             verts = new List<Vector3>();
             tris = new List<int>();
@@ -155,28 +168,43 @@ public class CreateWaterMesh : MonoBehaviour {
 
             verts.Add(new Vector3(surfaceList[k].x, surfaceList[k].y, frontSurfZ));
             verts.Add(new Vector3(surfaceList[k].x, surfaceList[k].y, backSurfZ));
-            uvs.Add(new Vector2(k + 1, k)); //Might want to redo UVs to scale to correct height
-            uvs.Add(new Vector2(k + 1, k + 1));
-            normals.Add(Vector3.up);
-            normals.Add(Vector3.up);
+            //uvs.Add(new Vector2(k + 1, k)); //Might want to redo UVs to scale to correct height
+            //uvs.Add(new Vector2(k + 1, k + 1));
+            //normals.Add(Vector3.up);
+            //normals.Add(Vector3.up);
 
             verts.Add(new Vector3(surfaceList[k + 1].x, surfaceList[k + 1].y, frontSurfZ));
             verts.Add(new Vector3(surfaceList[k + 1].x, surfaceList[k + 1].y, backSurfZ));
-            uvs.Add(new Vector2(k + 1, k)); //Might want to redo UVs to scale to correct height
-            uvs.Add(new Vector2(k + 1, k + 1));
-            normals.Add(Vector3.up);
-            normals.Add(Vector3.up);
+            //uvs.Add(new Vector2(k + 1, k)); //Might want to redo UVs to scale to correct height
+            //uvs.Add(new Vector2(k + 1, k + 1));
+            //normals.Add(Vector3.up);
+            //normals.Add(Vector3.up);
 
-            tris.Add(0); tris.Add(1); tris.Add(2);
-            tris.Add(2); tris.Add(1); tris.Add(3);
-
+            if (direction == 1)
+            {
+                tris.Add(0); tris.Add(1); tris.Add(2);
+                tris.Add(2); tris.Add(1); tris.Add(3);
+            }
+            else
+            {
+                tris.Add(0); tris.Add(2); tris.Add(1);
+                tris.Add(2); tris.Add(3); tris.Add(1);
+            }
             surfMesh.vertices = verts.ToArray();
             surfMesh.triangles = tris.ToArray();
             //surfMesh.RecalculateNormals();
             surfMesh.RecalculateBounds();
 
+            LineRenderer surfLine = waterSurfObj.GetComponent<LineRenderer>();
+            surfLine.SetPosition(0, new Vector3(surfaceList[k].x, surfaceList[k].y, frontSurfZ));
+            surfLine.SetPosition(1, new Vector3(surfaceList[k + 1].x, surfaceList[k + 1].y, frontSurfZ));
+
+
             //waterSurfObj.GetComponent<Renderer>().material = waterSurfaceMaterial;
         }
+
+        troubleShootVerts = new List<Vector3>(verts);
+
     }
 
 }

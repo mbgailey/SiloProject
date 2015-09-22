@@ -34,7 +34,7 @@ public class CreateWorld2 : MonoBehaviour {
     //Branch Characteristics
     float branchFrequency = 0.1f;    //Set chance to create a branchfloat branchFrequency = 0.1f;    //Set chance to create a branch
     Vector3 tunnelTendDist = new Vector3(0.10f, 0.6f, 1.0f); //Set distribution of tunnels between up and down and normal. Set as breakpoints between 0 and 1
-    int maxBranches = 15;
+    int maxBranches = 3;
     float tunnelHeight = 0.8f;
     int minTunnelLength = 20;
     int maxTunnelLength = 50;
@@ -319,6 +319,8 @@ public class CreateWorld2 : MonoBehaviour {
 
             
             //Keep track of water area using line positions from above
+            //If any part of the floor elevation is below the water line then we need to make water at this location
+
             //Vector4 quad = new Vector4(floorStart.y, ceilingStart.y, floorEnd.y, ceilingEnd.y);
             if (floorStart.y < globalWaterElevation || floorEnd.y < globalWaterElevation)
             {
@@ -343,6 +345,7 @@ public class CreateWorld2 : MonoBehaviour {
                     startFreeSurface = true;
                 }
 
+                //If ceiling piece starts below water line and goes above
                 if (ceilingStart.y < globalWaterElevation && ceilingEnd.y > globalWaterElevation)
                 {
                     startFreeSurface = true;
@@ -360,6 +363,7 @@ public class CreateWorld2 : MonoBehaviour {
                     
 
                 }
+                //If ceiling piece starts above water line and goes below
                 else if (ceilingStart.y > globalWaterElevation && ceilingEnd.y < globalWaterElevation)
                 {
                     endFreeSurface = true;
@@ -375,19 +379,22 @@ public class CreateWorld2 : MonoBehaviour {
                     waterBottomStart.y = waterBottomEnd.y;
                 }
 
+                //If both ends of ceiling piece are above the water line
                 else if (ceilingStart.y > globalWaterElevation && ceilingEnd.y > globalWaterElevation)
                 {
                     waterTopStart.y = Mathf.Min(ceilingStart.y, globalWaterElevation);    //Don't allow water to be above water elevation
                     waterTopEnd.y = Mathf.Min(ceilingEnd.y, globalWaterElevation);
                 }
-
+                //If floor piece starts above water line and goes below
                 if (floorStart.y > globalWaterElevation && floorEnd.y < globalWaterElevation)
                 {
                     startWater = true;
+                    startFreeSurface = true;
                     waterBottomStart.x = floorEnd.x - (Mathf.Abs(globalWaterElevation - floorEnd.y) * Mathf.Abs(floorEnd.x - floorStart.x) / Mathf.Abs(floorEnd.y - floorStart.y));
                     waterTopStart.x = waterBottomStart.x;
                     //waterTopStart.y = waterElevation;
                 }
+                //If floor piece starts below water line and goes above
                 else if (floorStart.y < globalWaterElevation && floorEnd.y > globalWaterElevation)
                 {
                     endWater = true;
@@ -447,10 +454,18 @@ public class CreateWorld2 : MonoBehaviour {
                     startedFreeSurface = false;
                     endFreeSurface = false;
                 }
+                
 
 
                 if (endWater)
                 {
+                    //If free surface hasn't been ended yet
+                    if (startedFreeSurface)
+                    {
+                        waterSurface.Add(waterTopEnd);
+                        startedFreeSurface = false;
+                    }
+                    
                     if (waterQuads.Count != 0)
                     {
                         waterObj = Instantiate(waterPrefab);
@@ -559,6 +574,15 @@ public class CreateWorld2 : MonoBehaviour {
         EndTunnelActions:
         if (waterQuads.Count != 0)
         {
+            //If free surface hasn't been ended yet
+            if (startedFreeSurface)
+            {
+                Vector2 waterTopEnd = ceilingEndPos;
+                waterTopEnd.y = Mathf.Min(waterTopEnd.y, globalWaterElevation);
+                waterSurface.Add(waterTopEnd);
+                startedFreeSurface = false;
+            }
+            
             waterObj = Instantiate(waterPrefab);
             waterObj.GetComponent<CreateWaterMesh>().CreateWaterBody(waterQuads, waterSurface, direction, waterObj);
         }
