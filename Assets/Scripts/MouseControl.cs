@@ -19,7 +19,7 @@ public class MouseControl : MonoBehaviour {
         {
             
             GameObject hitObj = hitInfo.transform.gameObject;
-            Debug.Log("Hit " + hitObj);
+            //Debug.Log("Hit " + hitObj);
             if (hitObj.tag == "InteractableObject")
             {
 

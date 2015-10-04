@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 
 public class Inventory : MonoBehaviour {
 
@@ -59,10 +60,15 @@ public class Inventory : MonoBehaviour {
         GameObject obj = (GameObject)Instantiate(item.itemObj);
         InventoryObjects[currentSlot] = obj;
         obj.transform.parent = Slots[currentSlot].transform;
-        obj.transform.localPosition = new Vector3(0f, 0f, -1f);
+        obj.transform.localPosition = new Vector3(0f, 0f, 5f);  //Start behind inventory GUI
         obj.isStatic = false;
         obj.layer = LayerMask.NameToLayer("3dGUI");
         obj.transform.localScale = new Vector3(55f, 55f, 55f);
+        
+        //Visual Effects
+        obj.transform.DOLocalMove(new Vector3 (0f,0f,-1f), 1, false);   //Tween to position in front of GUI
+        Slots[currentSlot].gameObject.GetComponent<InventorySlot>().FlashHighlight();
+        Debug.Log("made it2");
         currentSlot++;
 
     }
@@ -71,6 +77,8 @@ public class Inventory : MonoBehaviour {
     {
         currentItem.itemCount += newItem.itemCount;
         Slots[slotNum].gameObject.GetComponent<InventorySlot>().UpdateCountDisplay(currentItem.itemCount);
+        InventoryObjects[slotNum].transform.DOPunchScale(new Vector3(60f, 60f, 60f), 1f, 5, 0.25f); //Tween punch effect
+        Slots[slotNum].gameObject.GetComponent<InventorySlot>().FlashHighlight();
     }
 
 
