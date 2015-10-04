@@ -628,7 +628,7 @@ public class CreateWorld2 : MonoBehaviour {
 
             thisObj.transform.SetParent(WallPieces.transform);
 
-            worldResources.PopulateTunnel(Tunnel, WorldResources.resourceType.blueMushroom, direction);
+            worldResources.PopulateTunnel(Tunnel, direction);
         }
 
 

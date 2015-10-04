@@ -7,8 +7,8 @@ public class ObjectSelection : MonoBehaviour {
     Material[] selectedMatList;
     Material[] normalMats;
     MeshRenderer rend;
-    enum ItemType { resource, item, enemy}
-    ItemType myType;
+    enum ItemCategory { resource, item, enemy}
+    ItemCategory myType;
     
     public bool selected = false;
 
@@ -21,7 +21,7 @@ public class ObjectSelection : MonoBehaviour {
         {
             selectedMatList[i] = selectedMat;
         }
-        myType = ItemType.resource;
+        myType = ItemCategory.resource;
 	}
 	
 	public void SelectObject () 
@@ -39,7 +39,7 @@ public class ObjectSelection : MonoBehaviour {
 
     public void ActionOnObject()
     {
-        if (myType == ItemType.resource)
+        if (myType == ItemCategory.resource)
         {
             this.GetComponent<ResourceBehavior>().Harvest();
         }

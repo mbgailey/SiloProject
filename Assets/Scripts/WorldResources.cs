@@ -4,9 +4,10 @@ using System.Collections.Generic;
 
 public class WorldResources : MonoBehaviour {
 
-    public enum resourceType { blueMushroom, greenMushroom, ironOre };
-    public GameObject[] ResourceBinPrefabs = new GameObject[1];
-    public float[] chanceToSpawn = new float[1];
+    //public enum resourceType { blueMushroom, greenMushroom, ironOre };
+    public Item.itemType[] resourceList = new Item.itemType[3];
+    public GameObject[] ResourceBinPrefabs = new GameObject[3];
+    public float[] chanceToSpawn = new float[3];
     float offset = 0.2f;
 
 
@@ -15,12 +16,14 @@ public class WorldResources : MonoBehaviour {
 	
 	}
 	
-	public void PopulateTunnel (GameObject tunnelObj, resourceType resType, int tunnelDirection) 
+	public void PopulateTunnel (GameObject tunnelObj, int tunnelDirection) 
     {
 	    Transform floor = tunnelObj.transform.FindChild("FloorPieces");
 
         GameObject Resources = new GameObject("Resources");
         Resources.transform.SetParent(tunnelObj.transform);
+
+        Item.itemType resType = resourceList[SelectResource()];
 
         foreach (Transform child in floor)
         {
@@ -32,10 +35,18 @@ public class WorldResources : MonoBehaviour {
                 GameObject bin = (GameObject)Instantiate(ResourceBinPrefabs[(int)resType], child.position, Quaternion.Euler(0f, 0f, angle));
                 bin.transform.Translate(new Vector3(0f, offset)); //Move to slightly above floor
                 bin.transform.SetParent(Resources.transform);
-                bin.GetComponent<ResourceBinClass>().InitializeBin();
+                bin.GetComponent<ResourceBinClass>().InitializeBin(resType);
 
                 
             }
         }
     }
+
+    int SelectResource()
+    {   
+        int sel = Random.Range(0, resourceList.Length);
+        
+        return sel;
+    }
+
 }

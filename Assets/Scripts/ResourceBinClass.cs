@@ -16,6 +16,8 @@ public class ResourceBinClass : MonoBehaviour {
 
     int resourceCount = 0;
 
+    Item.itemType resType;
+
 	// Use this for initialization
 	void Awake () {
         spawnLocations = new Vector3[totalResources];
@@ -24,8 +26,11 @@ public class ResourceBinClass : MonoBehaviour {
         //InitializeBin();
 	}
 
-    public void InitializeBin()
+    public void InitializeBin(Item.itemType type)
     {
+        //Set type of resource bin
+        resType = type;
+        
         //Set spawn points and spawn resources
         for (int i = 0; i < totalResources; i++)
         {
@@ -37,7 +42,7 @@ public class ResourceBinClass : MonoBehaviour {
             ResourceBehavior resBehavior = res.GetComponent<ResourceBehavior>();
 
             
-            resBehavior.InitializeProps(i);
+            resBehavior.InitializeProps(i, resType);
             resourceObjList[i] = res;
             resPresentList[i] = true;
 
