@@ -6,16 +6,18 @@ public class PlatformController : MonoBehaviour {
     Animator anim;
     CapsuleCollider col;
     public float animSpeed = 1.5f;				// a public setting for overall animator animation speed
-    float groundMultiplier = 100f;
+    float groundMultiplier = 150f;
     float airMultiplier = 75f;
     float waterMultiplier = 50f;
     float jumpForce = 30f;
     
 
-    float maxspeed = 1f;
+    float maxspeed = 2f;
     float maxWaterSpeed = 0.75f;
     float rotateSpeed = 360f;
     float waterRotateSpeed = 180f;
+
+    float zPosLimit = 0.1f;
 
     //int direction;
     Rigidbody rb;
@@ -175,7 +177,21 @@ public class PlatformController : MonoBehaviour {
         if (anim.layerCount == 2)
             layer2CurrentState = anim.GetCurrentAnimatorStateInfo(1);	// set our layer2CurrentState variable to the current state of the second Layer (1) of animation
 
-        
+        //Apply Z Position Limits
+        Vector3 tempPos;
+        if (transform.position.z > zPosLimit)
+        {
+            tempPos = transform.position;
+            tempPos.z = zPosLimit;
+            transform.position = tempPos;
+        }
+
+        if (transform.position.z < -zPosLimit)
+        {
+            tempPos = transform.position;
+            tempPos.z = -zPosLimit;
+            transform.position = tempPos;
+        }
 
 
         // STANDARD JUMPING

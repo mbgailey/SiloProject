@@ -102,22 +102,42 @@ public class CreateWaterMesh : MonoBehaviour {
 
         //Debug.Log("quadList length " + quadList.Count);
         //Debug.Log("verts length " + verts.Count);
-
+        bool flipNormals = false;
         for (int j = 0; j < verts.Count - 2; j++)
         {
+            
             if (direction == 1)
             {
-
-                tris.Add(j);
-                tris.Add(j + 1);
-                tris.Add(j + 2);
+                if (!flipNormals)
+                {
+                    tris.Add(j);
+                    tris.Add(j + 1);
+                    tris.Add(j + 2);
+                }
+                else
+                {
+                    tris.Add(j);
+                    tris.Add(j + 2);
+                    tris.Add(j + 1);
+                }
             }
             else
             {
-                tris.Add(j);
-                tris.Add(j + 2);
-                tris.Add(j + 1);
+                if (!flipNormals)
+                {
+                    tris.Add(j);
+                    tris.Add(j + 2);
+                    tris.Add(j + 1);
+                }
+                else
+                {
+                    tris.Add(j);
+                    tris.Add(j + 1);
+                    tris.Add(j + 2);
+                }
             }
+
+            flipNormals = !flipNormals;
 
         }
 
@@ -129,7 +149,7 @@ public class CreateWaterMesh : MonoBehaviour {
         //ret.uv = uvs.ToArray();
         mesh.triangles = tris.ToArray();
         //ret.normals = normals.ToArray();
-        mesh.RecalculateNormals();
+        //mesh.RecalculateNormals();
         mesh.RecalculateBounds();
 
         waterObj.GetComponent<Renderer>().material = waterMaterial;
@@ -194,6 +214,9 @@ public class CreateWaterMesh : MonoBehaviour {
             surfMesh.triangles = tris.ToArray();
             //surfMesh.RecalculateNormals();
             surfMesh.RecalculateBounds();
+
+            BoxCollider collider = waterSurfObj.AddComponent<BoxCollider>();
+            collider.isTrigger = true;
 
             LineRenderer surfLine = waterSurfObj.GetComponent<LineRenderer>();
             surfLine.SetPosition(0, new Vector3(surfaceList[k].x, surfaceList[k].y, frontSurfZ));
