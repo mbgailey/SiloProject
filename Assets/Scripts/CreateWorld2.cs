@@ -7,7 +7,7 @@ public class CreateWorld2 : MonoBehaviour {
     ////Tunnel Variables and Objects////
     public GameObject tunnelPiecePrefab;
     
-    float clearanceWidth = 0.2f; //Used to account for clearance between piece sections. 0.2 if needed
+    float clearanceWidth = 0.5f; //Used to account for clearance between piece sections. 0.2 if needed
     GameObject floorObj;
     GameObject ceilingObj;
     float pieceLength = 1f;
@@ -290,14 +290,14 @@ public class CreateWorld2 : MonoBehaviour {
             //At this point floorPos should be end point for current/about to be placed piece. prevFloorPos should be start point for current/about to be placed piece
             
             Vector3 floorStart = floorStartPos; //Line 1 spans floor piece middle to end
-            floorStart.x += 0.5f * direction; 
+            floorStart.x += clearanceWidth * direction; 
             floorStart.y -= clearanceWidth; //Use outside edge accounting for clearance
             Vector3 floorEnd = floorEndPos;
             floorEnd.x += clearanceWidth * direction;
             floorEnd.y -= clearanceWidth;
 
             Vector3 ceilingStart = ceilingStartPos; //Line 2 spans ceiling piece middle to end
-            ceilingStart.x += 0.5f * direction;
+            ceilingStart.x += clearanceWidth * direction;
             ceilingStart.y += clearanceWidth;
             Vector3 ceilingEnd = ceilingEndPos;
             ceilingEnd.x += clearanceWidth * direction;
@@ -339,14 +339,15 @@ public class CreateWorld2 : MonoBehaviour {
 
                 int numberOfQuads = 1;
 
-                Vector2 waterBottomStart = floorStart;
-                Vector2 waterBottomEnd = floorEnd;
-                Vector2 waterTopStart = ceilingStart;
-                Vector2 waterTopEnd = ceilingEnd;
-                Vector2 waterBottomStart2 = floorStart;
-                Vector2 waterBottomEnd2 = floorEnd;
-                Vector2 waterTopStart2 = ceilingStart;
-                Vector2 waterTopEnd2 = ceilingEnd;
+                Vector2 waterBottomStart = floorStartPos;
+                Vector2 waterBottomEnd = floorEndPos;
+                Vector2 waterTopStart = ceilingStartPos;
+                Vector2 waterTopEnd = ceilingEndPos;
+
+                Vector2 waterBottomStart2 = waterBottomStart;
+                Vector2 waterBottomEnd2 = waterBottomEnd;
+                Vector2 waterTopStart2 = waterTopStart;
+                Vector2 waterTopEnd2 = waterTopEnd;
 
 
 
@@ -898,11 +899,11 @@ public class CreateWorld2 : MonoBehaviour {
             }
             else //Lower top of quad slightly to avoid interference with tunnel water quad above. It causes a weird material thing otherwise
             {
-                waterTopStart.y -= 0.2f;
-                waterTopEnd.y -= 0.2f;
+                //waterTopStart.y -= 0.05f;
+                //waterTopEnd.y -= 0.05f;
             }
-            waterBottomStart.y += 0.2f; //Lower top of quad slightly to avoid interference with tunnel water quad below. It causes a weird material thing otherwise
-            waterBottomEnd.y += 0.2f; //Maybe only need to do these two for upward shafts. Check if coverage is enough for downward shafts
+            //waterBottomStart.y += 0.05f; //Lower top of quad slightly to avoid interference with tunnel water quad below. It causes a weird material thing otherwise
+            //waterBottomEnd.y += 0.05f; //Maybe only need to do these two for upward shafts. Check if coverage is enough for downward shafts
 
             Vector2[] quad = new Vector2[4];
             quad[0] = waterBottomStart;
