@@ -37,7 +37,7 @@ public class CreateWorld2 : MonoBehaviour {
     //Branch Characteristics
     float branchFrequency = 0.1f;    //Set chance to create a branchfloat branchFrequency = 0.1f;    //Set chance to create a branch
     Vector3 tunnelTendDist = new Vector3(0.10f, 0.6f, 1.0f); //Set distribution of tunnels between up and down and normal. Set as breakpoints between 0 and 1
-    int maxBranches = 3;
+    public int maxBranches = 3;
     float tunnelHeight = 0.8f;
     int minTunnelLength = 20;
     int maxTunnelLength = 50;
@@ -67,14 +67,18 @@ public class CreateWorld2 : MonoBehaviour {
         //waterElevation = createWater.globalWaterElevation;
         worldResources = this.GetComponent<WorldResources>();
 
+        //GenerateTunnel(new Vector3(0f, 0f, 0f), 1, SelectTunnelTendency());
+        
+	}
+
+    public void GenerateWorld()
+    {
         if (useRandomSeed)
         {
             Random.seed = randomSeed;
         }
-
         GenerateTunnel(new Vector3(0f, 0f, 0f), 1, SelectTunnelTendency());
-        
-	}
+    }
 
     bool CheckForOverlap(Vector3 start1, Vector3 end1, Vector3 start2, Vector3 end2, Vector3 start3, Vector3 end3)
     {
