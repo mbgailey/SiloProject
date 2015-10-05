@@ -24,6 +24,7 @@ public class CreatePieceMesh : MonoBehaviour {
 
     float frontSurfZ = -0.5f;
     float backEdgeZ = 1.5f;
+    float vertCurtainHeight = 0.5f;
 
     public float maxBumpiness = 0.05f;
 
@@ -38,7 +39,8 @@ public class CreatePieceMesh : MonoBehaviour {
     List<Vector3> floorVerts = new List<Vector3>();
     List<int> floorTris = new List<int>();    
     List<Vector3> curtainVerts = new List<Vector3>();
-    List<int> curtainTris = new List<int>(); 
+    List<int> curtainTris = new List<int>();
+    List<int> verticalCurtainTris = new List<int>(); 
 
 	// Use this for initialization
 	public void InitializePiece (float ang, Vector3 start, int xDir, int yDir, float startThick, float endThick, float depth, Material biomeMat) 
@@ -78,14 +80,14 @@ public class CreatePieceMesh : MonoBehaviour {
 
     void CreateCurtain()
     {
-    //Create black mesh on the off side of pieces so that other things are blocked
+        //Create black mesh on the off side of pieces so that other things are blocked
         GameObject curtain = new GameObject("Curtain");
         curtain.AddComponent<MeshFilter>();
         curtain.AddComponent<MeshRenderer>();
         Mesh curtainMesh = curtain.GetComponent<MeshFilter>().mesh;
         
 
-        List<Vector3> tempList = new List<Vector3>(curtainVerts);
+        List<Vector3> tempList = new List<Vector3>(curtainVerts);   //The front verts of the piece secondary edge. 
         int edgeVertCount = tempList.Count;
 
         foreach (Vector3 secVert in tempList)
@@ -147,6 +149,81 @@ public class CreatePieceMesh : MonoBehaviour {
         curtain.transform.position = this.transform.position;
         curtain.transform.SetParent(this.transform);
         curtain.gameObject.GetComponent<MeshRenderer>().material = curtainMaterial;
+
+        CreateVerticalCurtain(curtain, tempList);
+    }
+
+    void CreateVerticalCurtain(GameObject parentObj, List<Vector3> verticalCurtainVerts)
+    {
+        //Create black mesh on the front side of the face extending vertically. This will block the extra background edges and other geometry in the background
+        GameObject curtainVertical = new GameObject("VerticalCurtain");
+        curtainVertical.AddComponent<MeshFilter>();
+        curtainVertical.AddComponent<MeshRenderer>();
+        Mesh curtainMesh = curtainVertical.GetComponent<MeshFilter>().mesh;
+
+
+        List<Vector3> tempList = new List<Vector3>(verticalCurtainVerts);
+        int edgeVertCount = tempList.Count;
+
+        foreach (Vector3 secVert in tempList)
+        {
+            Vector3 backPos = secVert;
+            backPos.y += vertCurtainHeight * yDirection;
+            verticalCurtainVerts.Add(backPos);
+        }
+
+        bool switchNormals;
+
+        if (xDirection == -1 && yDirection == 1)
+        {
+            switchNormals = true;
+        }
+        else if (xDirection == -1 && yDirection == -1)
+        {
+            switchNormals = false;
+        }
+        else if (xDirection == 1 && yDirection == 1)
+        {
+            switchNormals = false;
+        }
+        else
+        {
+            switchNormals = true;
+        }
+
+        for (int j = 0; j < edgeVertCount - 1; j++)
+        {
+            if (!switchNormals)
+            {
+                verticalCurtainTris.Add(j);
+                verticalCurtainTris.Add(j + edgeVertCount);
+                verticalCurtainTris.Add(j + 1);
+
+                verticalCurtainTris.Add(j + 1);
+                verticalCurtainTris.Add(j + edgeVertCount);
+                verticalCurtainTris.Add(j + 1 + edgeVertCount);
+            }
+            else
+            {
+                verticalCurtainTris.Add(j);
+                verticalCurtainTris.Add(j + 1);
+                verticalCurtainTris.Add(j + edgeVertCount);
+
+                verticalCurtainTris.Add(j + 1);
+                verticalCurtainTris.Add(j + 1 + edgeVertCount);
+                verticalCurtainTris.Add(j + edgeVertCount);
+            }
+        }
+
+        curtainMesh.vertices = verticalCurtainVerts.ToArray();
+        curtainMesh.triangles = verticalCurtainTris.ToArray();
+
+        curtainMesh.RecalculateNormals();
+        curtainMesh.RecalculateBounds();
+
+        curtainVertical.transform.position = parentObj.transform.position;
+        curtainVertical.transform.SetParent(parentObj.transform);
+        curtainVertical.gameObject.GetComponent<MeshRenderer>().material = curtainMaterial;
 
     }
 
