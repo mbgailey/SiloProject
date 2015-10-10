@@ -25,8 +25,9 @@ public class WaterSplashController : MonoBehaviour {
             Debug.Log("PLAYER");
             if (vel.y < 0.2f)
             {
-                float scale = Mathf.Min(vel.magnitude, maxSpeed);
-                Debug.Log("CREATESPLASH");
+                //float scale = Mathf.Min(vel.magnitude, maxSpeed); //Velocity scale doesn't work yet with new character controller
+                float scale = 5f;
+                Debug.Log("CREATESPLASH; scale: " + scale);
                 CreateSplash(scale, other.transform.position);
             }
         }
