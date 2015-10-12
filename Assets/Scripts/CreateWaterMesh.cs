@@ -11,6 +11,8 @@ public class CreateWaterMesh : MonoBehaviour {
     [SerializeField]
     List<Vector3> troubleShootVerts = new List<Vector3>();
 
+    WaterController waterController;
+
     float frontSurfZ = -0.4f;
     float backSurfZ = 3f;
 
@@ -53,6 +55,7 @@ public class CreateWaterMesh : MonoBehaviour {
         //mesh.Clear();
 
         waterObj.transform.parent = parentObj.transform;
+        waterController = parentObj.AddComponent<WaterController>();
 
         float xCoord = quadList[0][0].x;  //Initialize as the first x coordinate in the quad list
         int i = 0;

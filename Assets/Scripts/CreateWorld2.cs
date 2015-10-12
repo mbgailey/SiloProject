@@ -56,6 +56,7 @@ public class CreateWorld2 : MonoBehaviour {
     //CreateBackground5 createBackground;
     CreateShaftBackground createShaftBackground;
     WorldResources worldResources;
+    CreateWater createWater;
 
     float globalWaterElevation = -2.0f;
 
@@ -66,7 +67,7 @@ public class CreateWorld2 : MonoBehaviour {
         //createWater = this.GetComponent<CreateWaterMesh>();
         //waterElevation = createWater.globalWaterElevation;
         worldResources = this.GetComponent<WorldResources>();
-
+        createWater = this.GetComponent<CreateWater>();
         //GenerateTunnel(new Vector3(0f, 0f, 0f), 1, SelectTunnelTendency());
         
 	}
@@ -136,8 +137,8 @@ public class CreateWorld2 : MonoBehaviour {
         tunnelFloorStart = floorStartPos;
         tunnelCeilingStart = ceilingStartPos;
 
-        List<Vector2[]> waterQuads = new List<Vector2[]>();
-        List<Vector2> waterSurface = new List<Vector2>();
+        //List<Vector2[]> waterQuads = new List<Vector2[]>();
+        //List<Vector2> waterSurface = new List<Vector2>();
 
         bool upShaftAllowed = false;
         bool downShaftAllowed = false;
@@ -150,9 +151,9 @@ public class CreateWorld2 : MonoBehaviour {
         int biomeInd = SelectBiomeMaterial();
         Material biomeMat = biomeMaterials[biomeInd];
 
-        bool startFreeSurface = false;
-        bool endFreeSurface = false;
-        bool startedFreeSurface = false;
+        //bool startFreeSurface = false;
+        //bool endFreeSurface = false;
+        //bool startedFreeSurface = false;
 
         //if (branchCount > maxBranches)  //If max branches has been reached, don't continue this function. (Other functions currently executing should still finish)
         //    return;
@@ -336,159 +337,160 @@ public class CreateWorld2 : MonoBehaviour {
             //If any part of the floor elevation is below the water line then we need to make water at this location
 
             //Vector4 quad = new Vector4(floorStart.y, ceilingStart.y, floorEnd.y, ceilingEnd.y);
-            if (floorStart.y < globalWaterElevation || floorEnd.y < globalWaterElevation)
-            {
-                bool startWater = false;
-                bool endWater = false;
+            /////////////////////////////
+            //if (floorStart.y < globalWaterElevation || floorEnd.y < globalWaterElevation)
+            //{
+            //    bool startWater = false;
+            //    bool endWater = false;
 
-                int numberOfQuads = 1;
+            //    int numberOfQuads = 1;
 
-                Vector2 waterBottomStart = floorStartPos;
-                Vector2 waterBottomEnd = floorEndPos;
-                Vector2 waterTopStart = ceilingStartPos;
-                Vector2 waterTopEnd = ceilingEndPos;
+            //    Vector2 waterBottomStart = floorStartPos;
+            //    Vector2 waterBottomEnd = floorEndPos;
+            //    Vector2 waterTopStart = ceilingStartPos;
+            //    Vector2 waterTopEnd = ceilingEndPos;
 
-                Vector2 waterBottomStart2 = waterBottomStart;
-                Vector2 waterBottomEnd2 = waterBottomEnd;
-                Vector2 waterTopStart2 = waterTopStart;
-                Vector2 waterTopEnd2 = waterTopEnd;
+            //    Vector2 waterBottomStart2 = waterBottomStart;
+            //    Vector2 waterBottomEnd2 = waterBottomEnd;
+            //    Vector2 waterTopStart2 = waterTopStart;
+            //    Vector2 waterTopEnd2 = waterTopEnd;
 
 
 
-                if (i == 0 && ceilingStart.y > globalWaterElevation && floorStart.y < globalWaterElevation)
-                {
-                    startFreeSurface = true;
-                }
+            //    if (i == 0 && ceilingStart.y > globalWaterElevation && floorStart.y < globalWaterElevation)
+            //    {
+            //        startFreeSurface = true;
+            //    }
 
-                //If ceiling piece starts below water line and goes above
-                if (ceilingStart.y < globalWaterElevation && ceilingEnd.y > globalWaterElevation)
-                {
-                    startFreeSurface = true;
-                    numberOfQuads = 2;
-                    //First Quad
-                    waterTopEnd.y = globalWaterElevation;
-                    waterTopEnd.x = ceilingEnd.x - (Mathf.Abs(globalWaterElevation - ceilingEnd.y) * Mathf.Abs(ceilingEnd.x - ceilingStart.x) / Mathf.Abs(ceilingEnd.y - ceilingStart.y)) * direction;
-                    waterBottomEnd.x = waterTopEnd.x;
-                    //waterBottomEnd.y = /////Need to finish
+            //    //If ceiling piece starts below water line and goes above
+            //    if (ceilingStart.y < globalWaterElevation && ceilingEnd.y > globalWaterElevation)
+            //    {
+            //        startFreeSurface = true;
+            //        numberOfQuads = 2;
+            //        //First Quad
+            //        waterTopEnd.y = globalWaterElevation;
+            //        waterTopEnd.x = ceilingEnd.x - (Mathf.Abs(globalWaterElevation - ceilingEnd.y) * Mathf.Abs(ceilingEnd.x - ceilingStart.x) / Mathf.Abs(ceilingEnd.y - ceilingStart.y)) * direction;
+            //        waterBottomEnd.x = waterTopEnd.x;
+            //        //waterBottomEnd.y = /////Need to finish
 
-                    //Second Quad
-                    waterBottomStart2.x = waterTopStart2.x = waterTopEnd.x;
-                    waterTopStart2.y = waterTopEnd2.y = globalWaterElevation;
-                    waterBottomStart.y = waterBottomEnd.y;
+            //        //Second Quad
+            //        waterBottomStart2.x = waterTopStart2.x = waterTopEnd.x;
+            //        waterTopStart2.y = waterTopEnd2.y = globalWaterElevation;
+            //        waterBottomStart.y = waterBottomEnd.y;
                     
 
-                }
-                //If ceiling piece starts above water line and goes below
-                else if (ceilingStart.y > globalWaterElevation && ceilingEnd.y < globalWaterElevation)
-                {
-                    endFreeSurface = true;
-                    numberOfQuads = 2;
-                    //First Quad
-                    waterTopStart.y = waterTopEnd.y = globalWaterElevation;
-                    waterTopEnd.x = ceilingEnd.x - (Mathf.Abs(globalWaterElevation - ceilingEnd.y) * Mathf.Abs(ceilingEnd.x - ceilingStart.x) / Mathf.Abs(ceilingEnd.y - ceilingStart.y)) * direction;
-                    waterBottomEnd.x = waterTopEnd.x;
-                    //waterBottomEnd.y = /////Need to finish
-                    //Second Quad
-                    waterBottomStart2.x = waterTopStart2.x = waterTopEnd.x;
-                    waterTopStart2.y = globalWaterElevation;
-                    waterBottomStart.y = waterBottomEnd.y;
-                }
+            //    }
+            //    //If ceiling piece starts above water line and goes below
+            //    else if (ceilingStart.y > globalWaterElevation && ceilingEnd.y < globalWaterElevation)
+            //    {
+            //        endFreeSurface = true;
+            //        numberOfQuads = 2;
+            //        //First Quad
+            //        waterTopStart.y = waterTopEnd.y = globalWaterElevation;
+            //        waterTopEnd.x = ceilingEnd.x - (Mathf.Abs(globalWaterElevation - ceilingEnd.y) * Mathf.Abs(ceilingEnd.x - ceilingStart.x) / Mathf.Abs(ceilingEnd.y - ceilingStart.y)) * direction;
+            //        waterBottomEnd.x = waterTopEnd.x;
+            //        //waterBottomEnd.y = /////Need to finish
+            //        //Second Quad
+            //        waterBottomStart2.x = waterTopStart2.x = waterTopEnd.x;
+            //        waterTopStart2.y = globalWaterElevation;
+            //        waterBottomStart.y = waterBottomEnd.y;
+            //    }
 
-                //If both ends of ceiling piece are above the water line
-                else if (ceilingStart.y > globalWaterElevation && ceilingEnd.y > globalWaterElevation)
-                {
-                    waterTopStart.y = Mathf.Min(ceilingStart.y, globalWaterElevation);    //Don't allow water to be above water elevation
-                    waterTopEnd.y = Mathf.Min(ceilingEnd.y, globalWaterElevation);
-                }
-                //If floor piece starts above water line and goes below
-                if (floorStart.y > globalWaterElevation && floorEnd.y < globalWaterElevation)
-                {
-                    startWater = true;
-                    startFreeSurface = true;
-                    waterBottomStart.x = floorEnd.x - (Mathf.Abs(globalWaterElevation - floorEnd.y) * Mathf.Abs(floorEnd.x - floorStart.x) / Mathf.Abs(floorEnd.y - floorStart.y)) * direction;
-                    waterTopStart.x = waterBottomStart.x;
-                    //waterTopStart.y = waterElevation;
-                }
-                //If floor piece starts below water line and goes above
-                else if (floorStart.y < globalWaterElevation && floorEnd.y > globalWaterElevation)
-                {
-                    endWater = true;
-                    endFreeSurface = true;
-                    waterBottomEnd.x = floorEnd.x - (Mathf.Abs(globalWaterElevation - floorEnd.y) * Mathf.Abs(floorEnd.x - floorStart.x) / Mathf.Abs(floorEnd.y - floorStart.y)) * direction;
-                    waterTopEnd.x = waterBottomStart.x;
-                    waterTopEnd.y = globalWaterElevation;
-                }
+            //    //If both ends of ceiling piece are above the water line
+            //    else if (ceilingStart.y > globalWaterElevation && ceilingEnd.y > globalWaterElevation)
+            //    {
+            //        waterTopStart.y = Mathf.Min(ceilingStart.y, globalWaterElevation);    //Don't allow water to be above water elevation
+            //        waterTopEnd.y = Mathf.Min(ceilingEnd.y, globalWaterElevation);
+            //    }
+            //    //If floor piece starts above water line and goes below
+            //    if (floorStart.y > globalWaterElevation && floorEnd.y < globalWaterElevation)
+            //    {
+            //        startWater = true;
+            //        startFreeSurface = true;
+            //        waterBottomStart.x = floorEnd.x - (Mathf.Abs(globalWaterElevation - floorEnd.y) * Mathf.Abs(floorEnd.x - floorStart.x) / Mathf.Abs(floorEnd.y - floorStart.y)) * direction;
+            //        waterTopStart.x = waterBottomStart.x;
+            //        //waterTopStart.y = waterElevation;
+            //    }
+            //    //If floor piece starts below water line and goes above
+            //    else if (floorStart.y < globalWaterElevation && floorEnd.y > globalWaterElevation)
+            //    {
+            //        endWater = true;
+            //        endFreeSurface = true;
+            //        waterBottomEnd.x = floorEnd.x - (Mathf.Abs(globalWaterElevation - floorEnd.y) * Mathf.Abs(floorEnd.x - floorStart.x) / Mathf.Abs(floorEnd.y - floorStart.y)) * direction;
+            //        waterTopEnd.x = waterBottomStart.x;
+            //        waterTopEnd.y = globalWaterElevation;
+            //    }
 
-                //waterTopStart.y = Mathf.Min(ceilingStart.y, waterElevation);    //Don't allow water to be above water elevation
-                //waterTopEnd.y = Mathf.Min(ceilingEnd.y, waterElevation);
+            //    //waterTopStart.y = Mathf.Min(ceilingStart.y, waterElevation);    //Don't allow water to be above water elevation
+            //    //waterTopEnd.y = Mathf.Min(ceilingEnd.y, waterElevation);
 
-                if (startWater)
-                {
-                    waterQuads.Clear();
-                    waterSurface.Clear();
-                }
+            //    if (startWater)
+            //    {
+            //        waterQuads.Clear();
+            //        waterSurface.Clear();
+            //    }
 
-                Vector2[] quad = new Vector2[4];
-                quad[0] = waterBottomStart;
-                quad[1] = waterTopStart;
-                quad[2] = waterBottomEnd;
-                quad[3] = waterTopEnd;
-                waterQuads.Add(quad);
+            //    Vector2[] quad = new Vector2[4];
+            //    quad[0] = waterBottomStart;
+            //    quad[1] = waterTopStart;
+            //    quad[2] = waterBottomEnd;
+            //    quad[3] = waterTopEnd;
+            //    waterQuads.Add(quad);
                 
-                if (numberOfQuads == 2)
-                {
-                    Vector2[] quad2 = new Vector2[4];
-                    quad2[0] = waterBottomStart2;
-                    quad2[1] = waterTopStart2;
-                    quad2[2] = waterBottomEnd2;
-                    quad2[3] = waterTopEnd2;
-                    waterQuads.Add(quad2);
-                }
-                //Debug.Log("Quad0 " + quad[0] + " Quad1 " + quad[1] + " Quad2 " + quad[2] + " Quad3 " + quad[3]);
+            //    if (numberOfQuads == 2)
+            //    {
+            //        Vector2[] quad2 = new Vector2[4];
+            //        quad2[0] = waterBottomStart2;
+            //        quad2[1] = waterTopStart2;
+            //        quad2[2] = waterBottomEnd2;
+            //        quad2[3] = waterTopEnd2;
+            //        waterQuads.Add(quad2);
+            //    }
+            //    //Debug.Log("Quad0 " + quad[0] + " Quad1 " + quad[1] + " Quad2 " + quad[2] + " Quad3 " + quad[3]);
 
-                if (startFreeSurface)
-                {
-                    if (numberOfQuads == 2)
-                    {
-                        waterSurface.Add(waterTopStart2);
-                        //Instantiate(marker, waterTopStart2, Quaternion.identity);
-                    }
-                    else
-                    {
-                        waterSurface.Add(waterTopStart);
-                        //Instantiate(marker, waterTopStart, Quaternion.identity);
-                    }
-                    startFreeSurface = false;
-                    startedFreeSurface = true;
-                }
-                if (startedFreeSurface && endFreeSurface)
-                {
-                    waterSurface.Add(waterTopEnd);
-                    startFreeSurface = endFreeSurface = false; //Reset flags
-                    //Instantiate(marker, waterTopEnd, Quaternion.identity);
-                    startedFreeSurface = false;
+            //    if (startFreeSurface)
+            //    {
+            //        if (numberOfQuads == 2)
+            //        {
+            //            waterSurface.Add(waterTopStart2);
+            //            //Instantiate(marker, waterTopStart2, Quaternion.identity);
+            //        }
+            //        else
+            //        {
+            //            waterSurface.Add(waterTopStart);
+            //            //Instantiate(marker, waterTopStart, Quaternion.identity);
+            //        }
+            //        startFreeSurface = false;
+            //        startedFreeSurface = true;
+            //    }
+            //    if (startedFreeSurface && endFreeSurface)
+            //    {
+            //        waterSurface.Add(waterTopEnd);
+            //        startFreeSurface = endFreeSurface = false; //Reset flags
+            //        //Instantiate(marker, waterTopEnd, Quaternion.identity);
+            //        startedFreeSurface = false;
                    
-                }
+            //    }
                 
 
 
-                if (endWater)
-                {
-                    //If free surface hasn't been ended yet
-                    if (startedFreeSurface)
-                    {
-                        waterSurface.Add(waterTopEnd);
-                        startedFreeSurface = false;
-                        startFreeSurface = endFreeSurface = false;
-                    }
+            //    if (endWater)
+            //    {
+            //        //If free surface hasn't been ended yet
+            //        if (startedFreeSurface)
+            //        {
+            //            waterSurface.Add(waterTopEnd);
+            //            startedFreeSurface = false;
+            //            startFreeSurface = endFreeSurface = false;
+            //        }
 
-                    if (waterQuads.Count != 0)
-                    {
-                        waterObj = Instantiate(waterPrefab);
-                        waterObj.GetComponent<CreateWaterMesh>().CreateWaterBody(waterQuads, waterSurface, direction, waterObj);
-                    }
-                }
-            }
+            //        if (waterQuads.Count != 0)
+            //        {
+            //            waterObj = Instantiate(waterPrefab);
+            //            waterObj.GetComponent<CreateWaterMesh>().CreateWaterBody(waterQuads, waterSurface, direction, waterObj);
+            //        }
+            //    }
+            //}
 
             //if (shaftDown)
             //{
@@ -588,20 +590,20 @@ public class CreateWorld2 : MonoBehaviour {
         }
         
         EndTunnelActions:
-        if (waterQuads.Count != 0)
-        {
-            //If free surface hasn't been ended yet
-            if (startedFreeSurface)
-            {
-                Vector2 waterTopEnd = ceilingEndPos;
-                waterTopEnd.y = Mathf.Min(waterTopEnd.y, globalWaterElevation);
-                waterSurface.Add(waterTopEnd);
-                startedFreeSurface = false;
-            }
+        //if (waterQuads.Count != 0)
+        //{
+        //    //If free surface hasn't been ended yet
+        //    if (startedFreeSurface)
+        //    {
+        //        Vector2 waterTopEnd = ceilingEndPos;
+        //        waterTopEnd.y = Mathf.Min(waterTopEnd.y, globalWaterElevation);
+        //        waterSurface.Add(waterTopEnd);
+        //        startedFreeSurface = false;
+        //    }
             
-            waterObj = Instantiate(waterPrefab);
-            waterObj.GetComponent<CreateWaterMesh>().CreateWaterBody(waterQuads, waterSurface, direction, waterObj);
-        }
+        //    waterObj = Instantiate(waterPrefab);
+        //    waterObj.GetComponent<CreateWaterMesh>().CreateWaterBody(waterQuads, waterSurface, direction, waterObj);
+        //}
 
         float endHt = ceilingEndPos.y - floorEndPos.y;
         int endPieceCount = (int)(endHt / pieceLength) + 1;
@@ -638,7 +640,7 @@ public class CreateWorld2 : MonoBehaviour {
 
 
         createBackground.PlaceBackground(tunnelFloorStart, tunnelCeilingStart, floorEndPoints, floorSlopeList, ceilingEndPoints, ceilingSlopeList, direction, biomeInd, BackgroundPieces);
-
+        createWater.CreateTunnelWater(tunnelFloorStart, tunnelCeilingStart, floorEndPoints, floorSlopeList, ceilingEndPoints, ceilingSlopeList, direction);
         //return;
 	}
 
