@@ -29,7 +29,10 @@ namespace UnityStandardAssets.Utility
 			// Early out if we don't have a target
             if (!target)
             {
-                target = GameObject.FindGameObjectWithTag("Player").transform;
+                if (GameObject.FindGameObjectWithTag("Player"))
+                {
+                    target = GameObject.FindGameObjectWithTag("Player").transform;
+                }
                 return;
             }
 				

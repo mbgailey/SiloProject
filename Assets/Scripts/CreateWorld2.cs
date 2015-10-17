@@ -69,7 +69,8 @@ public class CreateWorld2 : MonoBehaviour {
         worldResources = this.GetComponent<WorldResources>();
         createWater = this.GetComponent<CreateWater>();
         //GenerateTunnel(new Vector3(0f, 0f, 0f), 1, SelectTunnelTendency());
-        
+
+        GameObject.FindGameObjectWithTag("GameController").GetComponent<TideController>().tideEligible = true;
 	}
 
     public void GenerateWorld()

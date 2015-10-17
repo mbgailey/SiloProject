@@ -8,25 +8,34 @@ public class WaterSplashController : MonoBehaviour {
     float maxSpeed = 7f;
     float particleVelocityMultiplier = 0.75f;
     float maxEmissionRate = 150;
-    float globalWaterElevation = -2.0f;
+    //float globalWaterElevation = -2.0f;
+    TideController tideController;
+    CharacterControl playerController;
 
 	// Use this for initialization
 	void Start () {
-	
+        tideController = GameObject.FindGameObjectWithTag("GameController").GetComponent<TideController>();
 	}
 	
 	// Update is called once per frame
     void OnTriggerEnter(Collider other)
     {
-        Debug.Log("TRIGGERED");
+        //Debug.Log("TRIGGERED");
         if (other.tag == "Player")
         {
-            Vector3 vel = other.attachedRigidbody.velocity;
-            Debug.Log("PLAYER");
-            if (vel.y < 0.2f)
+            
+            if (!playerController)
             {
-                //float scale = Mathf.Min(vel.magnitude, maxSpeed); //Velocity scale doesn't work yet with new character controller
-                float scale = 5f;
+                playerController = GameObject.FindGameObjectWithTag("Player").GetComponent<CharacterControl>();
+            }
+            Vector3 vel = playerController._velocity;
+
+            Debug.Log("vel: " + vel);
+
+            if (vel.y < -0.05f)
+            {
+                float scale = Mathf.Min(Mathf.Abs(vel.y), maxSpeed); //Velocity scale doesn't work yet with new character controller
+                //float scale = 5f;
                 Debug.Log("CREATESPLASH; scale: " + scale);
                 CreateSplash(scale, other.transform.position);
             }
@@ -36,7 +45,7 @@ public class WaterSplashController : MonoBehaviour {
     void CreateSplash(float scale, Vector3 loc)
     {
         Vector3 tempLoc = loc;
-        tempLoc.y = globalWaterElevation;
+        tempLoc.y = tideController.globalWaterElevation;
         GameObject splash = (GameObject)Instantiate(splashPrefab, tempLoc, Quaternion.Euler(270f, 0f, 0f));
         ParticleSystem splashParticles = splash.GetComponent<ParticleSystem>();
 

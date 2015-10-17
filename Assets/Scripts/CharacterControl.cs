@@ -23,7 +23,8 @@ public class CharacterControl : MonoBehaviour
 	private CharacterController3D _controller;
 	private Animator _animator;
 	private RaycastHit _lastControllerColliderHit;
-	private Vector3 _velocity;
+    [HideInInspector]
+	public Vector3 _velocity;
 
     private bool grounded = false;
     private bool running = false;
@@ -75,22 +76,22 @@ public class CharacterControl : MonoBehaviour
 
 	void onTriggerEnterEvent( Collider col )
 	{
-		Debug.Log( "onTriggerEnterEvent: " + col.gameObject.name );
+		//Debug.Log( "onTriggerEnterEvent: " + col.gameObject.name );
 	}
 
 
 	void onTriggerExitEvent( Collider col )
 	{
-		Debug.Log( "onTriggerExitEvent: " + col.gameObject.name );
+		//Debug.Log( "onTriggerExitEvent: " + col.gameObject.name );
 	}
 
 	#endregion
 
     IEnumerator StartJumpCooldownTimer()
     {
-        Debug.Log("StartTimer");
+        //Debug.Log("StartTimer");
         yield return new WaitForSeconds(jumpCooldownTime);
-        Debug.Log("Eligible");
+        //Debug.Log("Eligible");
         jumpEligible = true;
     }
 
@@ -156,14 +157,14 @@ public class CharacterControl : MonoBehaviour
         //Apply water physics
         if (!swimming && globalPos.y < waterElevation - swimmingBuffer)
         {
-            Debug.Log("SWIMMING");
+            //Debug.Log("SWIMMING");
             swimming = true;
             jumping = false;
 
         }
         else if (swimming && globalPos.y > waterElevation - swimmingBuffer)
         {
-            Debug.Log("NOT SWIMMING");
+            //Debug.Log("NOT SWIMMING");
             swimming = false;
             jumping = false;
 
@@ -171,7 +172,7 @@ public class CharacterControl : MonoBehaviour
 
         if (globalPos.y > waterElevation - swimmingBuffer * 2f && globalPos.y < waterElevation + swimmingBuffer) //Surfaced
         {
-            Debug.Log("Surfaced");
+            //Debug.Log("Surfaced");
             //jumpEligible = true;
             surfaced = true;
 

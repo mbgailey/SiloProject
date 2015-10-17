@@ -8,14 +8,15 @@ public class TideController : MonoBehaviour {
     public float globalWaterElevation;
     public int currentWaterIndex = 0;
     float highTideElev = -2.0f;
-    float lowTideElev = -4.0f;
-     
+    float lowTideElev = -10.0f;
 
+    float tidePeriod = 20; //Time in seconds that tide will be up or down before transitioning again.
+    float timer = 0f;
     float tideSpeed = 0.25f;
     public bool tideIn = true;
-    public bool tideEligible = true;
+    public bool tideEligible = false;
 
-    int meshCount = 20;
+    int meshCount = 30;
     public float deltaElev;
 
     public List<WaterController> AllWaterControllers = new List<WaterController>();
@@ -39,6 +40,12 @@ public class TideController : MonoBehaviour {
 	// Update is called once per frame
     void Update()
     {
+        
+        if (tideEligible)
+        {
+            timer += Time.deltaTime;
+        }
+
         if (Input.GetKeyUp(KeyCode.L) && tideIn && tideEligible)
         {
             tideEligible = false;
@@ -49,6 +56,22 @@ public class TideController : MonoBehaviour {
             tideEligible = false;
             StartCoroutine(SendTideIn());
         }
+
+        if (timer >= tidePeriod && tideIn && tideEligible)
+        {
+            tideEligible = false;
+            StartCoroutine(SendTideOut());
+            timer = 0;
+        }
+
+        if (timer >= tidePeriod && !tideIn && tideEligible)
+        {
+            tideEligible = false;
+            StartCoroutine(SendTideIn());
+            timer = 0;
+        }
+
+
 
     }
 
