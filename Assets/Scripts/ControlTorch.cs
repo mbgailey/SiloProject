@@ -17,7 +17,7 @@ public class ControlTorch : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.T))
+        if (Input.GetButtonUp("Torch"))
         {
             if (torchOn) { torchOn = false; targetMult = 0f; TurnOff(); }
             else { torchOn = true; targetMult = multiplier; TurnOn(); }

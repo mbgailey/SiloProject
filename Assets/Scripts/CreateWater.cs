@@ -6,18 +6,40 @@ public class CreateWater : MonoBehaviour {
     TideController tideController;
     public GameObject waterPrefab;
 
+    float edgeBuffer = 0.3f;
+
 	// Use this for initialization
 	void Start () {
         tideController = GameObject.FindGameObjectWithTag("GameController").GetComponent<TideController>();
 	}
-	
-	// Update is called once per frame
-	public void CreateTunnelWater (Vector3 floorStartPos, Vector3 ceilingStartPos, List<Vector3> floorEndPoints, List<float> floorSlopes, List<Vector3> ceilingEndPoints, List<float> ceilingSlopes, int horizDir) {
 
-        GameObject waterObj;
+    public GameObject SetupWaterObjects()
+    {
         GameObject waterGroup;
         GameObject parentObj;
         WaterController waterController;
+
+        parentObj = new GameObject("WaterParent");
+        waterController = parentObj.AddComponent<WaterController>();
+        tideController.AllWaterControllers.Add(waterController);
+
+        foreach (float globalWaterElevation in tideController.waterMeshElevList)
+        {
+            waterGroup = new GameObject("WaterGroup");
+            waterGroup.transform.SetParent(parentObj.transform);
+            waterController.waterObjList.Add(waterGroup);
+        }
+
+        return parentObj;
+    }
+
+
+	public GameObject CreateTunnelWater (Vector3 floorStartPos, Vector3 ceilingStartPos, List<Vector3> floorEndPoints, List<float> floorSlopes, List<Vector3> ceilingEndPoints, List<float> ceilingSlopes, int horizDir, GameObject parentObj) {
+
+        GameObject waterObj;
+        Transform waterGroup;
+        //GameObject parentObj;
+        //WaterController waterController;
 
         bool startFreeSurface = false;
         bool endFreeSurface = false;
@@ -39,17 +61,18 @@ public class CreateWater : MonoBehaviour {
 
         //Debug.Log("floor list count: " + floorEndPoints.Count);
 
-        parentObj = new GameObject("WaterParent");   
-        waterController = parentObj.AddComponent<WaterController>();
-        tideController.AllWaterControllers.Add(waterController);
+        //parentObj = new GameObject("WaterParent");   
+        WaterController waterController = parentObj.GetComponent<WaterController>();
+        //tideController.AllWaterControllers.Add(waterController);
 
+        int meshIndex = 0;
         foreach (float globalWaterElevation in tideController.waterMeshElevList)
         {
             waterQuads.Clear();
             waterSurface.Clear();
-            waterGroup = new GameObject("WaterGroup");
-            waterGroup.transform.SetParent(parentObj.transform);
-            waterController.waterObjList.Add(waterGroup);
+            waterGroup = parentObj.transform.GetChild(meshIndex);
+            //waterGroup.transform.SetParent(parentObj.transform);
+            //waterController.waterObjList.Add(waterGroup);
 
             for (int i = 0; i < floorEndPoints.Count - 1; i++)
             {
@@ -74,6 +97,12 @@ public class CreateWater : MonoBehaviour {
                     Vector2 waterBottomEnd = floorEnd;
                     Vector2 waterTopStart = ceilingStart;
                     Vector2 waterTopEnd = ceilingEnd;
+
+                    //Add buffer to top and bottom to overlap with terrain pieces
+                    waterBottomStart.y -= edgeBuffer;
+                    waterBottomEnd.y -= edgeBuffer;
+                    waterTopStart.y += edgeBuffer;
+                    waterTopEnd.y += edgeBuffer;
 
                     Vector2 waterBottomStart2 = waterBottomStart;
                     Vector2 waterBottomEnd2 = waterBottomEnd;
@@ -213,7 +242,7 @@ public class CreateWater : MonoBehaviour {
                         {
                             waterObj = Instantiate(waterPrefab);
                             waterObj.GetComponent<CreateWaterMesh>().CreateWaterBody(waterQuads, waterSurface, horizDir, waterObj);
-                            waterObj.transform.SetParent(waterGroup.transform);
+                            waterObj.transform.SetParent(waterGroup);
                         }
                     }
                 }
@@ -233,12 +262,90 @@ public class CreateWater : MonoBehaviour {
 
                 waterObj = Instantiate(waterPrefab);
                 waterObj.GetComponent<CreateWaterMesh>().CreateWaterBody(waterQuads, waterSurface, horizDir, waterObj);
-                waterObj.transform.SetParent(waterGroup.transform);
+                waterObj.transform.SetParent(waterGroup);
             }
 
+            meshIndex++;
         }
 
         waterController.InitializeWater();
 
+        return parentObj;
+
 	}
+
+    public void CreateShaftWater(Vector3 bottomLeftPos, float shaftHeight, float shaftWidth, int vertDir, GameObject parentObj)
+    {
+        GameObject waterObj;
+        Transform waterGroup;
+        List<Vector2[]> waterQuads = new List<Vector2[]>();
+        List<Vector2> waterSurface = new List<Vector2>();
+
+        WaterController controller = parentObj.GetComponent<WaterController>();
+
+        int meshIndex = 0;
+        foreach (float globalWaterElevation in tideController.waterMeshElevList)
+        {
+            waterQuads.Clear();
+            waterSurface.Clear();
+            waterGroup = parentObj.transform.GetChild(meshIndex);
+
+
+            if (bottomLeftPos.y < globalWaterElevation)
+            {
+                Vector2 waterBottomStart = bottomLeftPos;
+                Vector2 waterBottomEnd = bottomLeftPos;
+                waterBottomEnd.x += shaftWidth;
+                Vector2 waterTopStart = bottomLeftPos;
+                waterTopStart.y += shaftHeight;
+                Vector2 waterTopEnd = waterBottomEnd;
+                waterTopEnd.y += shaftHeight;
+
+                //Add edge buffers
+                if (vertDir == 1)   //Up shaft
+                {
+                    waterBottomStart.y += edgeBuffer;
+                    waterBottomEnd.y += edgeBuffer;
+                }
+                else
+                {
+                    waterTopStart.y -= edgeBuffer;
+                    waterTopEnd.y -= edgeBuffer;
+                }
+
+                if (waterTopStart.y > globalWaterElevation)
+                {
+                    waterTopStart.y = globalWaterElevation;
+                    waterTopEnd.y = globalWaterElevation;
+                    waterSurface.Add(waterTopStart);
+                    waterSurface.Add(waterTopEnd);
+                }
+                else //Lower top of quad slightly to avoid interference with tunnel water quad above. It causes a weird material thing otherwise
+                {
+                    //waterTopStart.y -= 0.05f;
+                    //waterTopEnd.y -= 0.05f;
+                }
+                //waterBottomStart.y += 0.05f; //Lower top of quad slightly to avoid interference with tunnel water quad below. It causes a weird material thing otherwise
+                //waterBottomEnd.y += 0.05f; //Maybe only need to do these two for upward shafts. Check if coverage is enough for downward shafts
+
+                Vector2[] quad = new Vector2[4];
+                quad[0] = waterBottomStart;
+                quad[1] = waterTopStart;
+                quad[2] = waterBottomEnd;
+                quad[3] = waterTopEnd;
+                waterQuads.Add(quad);
+            }
+
+            if (waterQuads.Count != 0)
+            {
+                waterObj = Instantiate(waterPrefab);
+                waterObj.GetComponent<CreateWaterMesh>().CreateWaterBody(waterQuads, waterSurface, 1, waterObj);
+                //Transform myParent = controller.waterObjList[meshIndex].transform;
+                waterObj.transform.SetParent(waterGroup);
+            }
+
+            meshIndex++;
+        }
+    }
+
 }

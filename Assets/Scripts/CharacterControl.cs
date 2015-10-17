@@ -13,7 +13,7 @@ public class CharacterControl : MonoBehaviour
 	public float inAirDamping = 5f;
 	public float jumpHeight = 3f;
 
-    float jumpCooldownTime = 0.25f;
+    float jumpCooldownTime = 0.15f;
     bool jumpEligible = true;
 
 	[HideInInspector]
@@ -29,6 +29,7 @@ public class CharacterControl : MonoBehaviour
     private bool running = false;
     private bool jumping = false;
     private bool swimming = false;
+    private bool surfaced = false;
     private int direction = 1;
 
     float rotateSpeed = 420f;
@@ -38,9 +39,10 @@ public class CharacterControl : MonoBehaviour
 
     //int direction;
     Rigidbody rb;
-    float globalWaterElevation = -2.1f;
+    float waterElevation;
+    float swimmingBuffer = 0.1f;
 
-    
+    TideController tideController;
 
 	void Awake()
 	{
@@ -54,6 +56,7 @@ public class CharacterControl : MonoBehaviour
 		_controller.onTriggerExitEvent += onTriggerExitEvent;
 
         Vector3 globalPos = rb.position;
+        tideController = GameObject.FindGameObjectWithTag("GameController").GetComponent<TideController>();
 	}
 
 
@@ -95,19 +98,23 @@ public class CharacterControl : MonoBehaviour
 	void Update()
 	{
         Vector3 globalPos = rb.position;
+        waterElevation = tideController.globalWaterElevation;
 
         if (_controller.isGrounded)
         {
             _velocity.y = 0;
-            if (jumping)
-            {
-                jumping = false;
-                StartCoroutine(StartJumpCooldownTimer());
-            }
+            
         }
+
+        if (jumping && (swimming || surfaced || _controller.isGrounded))
+        {
+            jumping = false;
+            StartCoroutine(StartJumpCooldownTimer());
+        }
+
         float h = Input.GetAxis("Horizontal");				// setup h variable as our horizontal input axis
         float v = Input.GetAxis("Vertical");	// setup v variables as our vertical input axis
-        float j = Input.GetAxis("Jump");
+        bool j = Input.GetButtonDown("Jump");
 
 		if( h > 0f )
 		{
@@ -147,20 +154,33 @@ public class CharacterControl : MonoBehaviour
 		}
 
         //Apply water physics
-        if (!swimming && globalPos.y < globalWaterElevation)
+        if (!swimming && globalPos.y < waterElevation - swimmingBuffer)
         {
             Debug.Log("SWIMMING");
             swimming = true;
             jumping = false;
 
         }
-        else if (swimming && globalPos.y > globalWaterElevation)
+        else if (swimming && globalPos.y > waterElevation - swimmingBuffer)
         {
             Debug.Log("NOT SWIMMING");
             swimming = false;
             jumping = false;
 
         }
+
+        if (globalPos.y > waterElevation - swimmingBuffer * 2f && globalPos.y < waterElevation + swimmingBuffer) //Surfaced
+        {
+            Debug.Log("Surfaced");
+            //jumpEligible = true;
+            surfaced = true;
+
+        }
+        else
+        {
+            surfaced = false;
+        }
+
 
         if (swimming)
         {
@@ -183,14 +203,14 @@ public class CharacterControl : MonoBehaviour
 
 
 		//Add some float if jump button is held down while in the air
-        if (!_controller.isGrounded && j > 0f && jumping == true)
+        if (!_controller.isGrounded && Input.GetButton("Jump") && jumping == true)
         {
-            _velocity.y += 0.25f * -gravity * Time.deltaTime;
+            _velocity.y += 0.6f * -gravity * Time.deltaTime;
 
         }
 
         // we can only jump whilst grounded or swimming
-        if (_controller.isGrounded && j > 0f && jumpEligible)
+        if ((_controller.isGrounded && j && jumpEligible) || (surfaced && j && jumpEligible))
 		{
 			_velocity.y = Mathf.Sqrt( 2f * jumpHeight * -gravity );
             jumping = true;

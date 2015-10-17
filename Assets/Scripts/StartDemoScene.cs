@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 public class StartDemoScene : MonoBehaviour {
 
@@ -29,14 +30,17 @@ public class StartDemoScene : MonoBehaviour {
             StartDemo();
         }
 
+        EventSystem.current.SetSelectedGameObject(startButton.gameObject);
+
 	}
 	
 	// Update is called once per frame
 	void Update () {
 
-        if (Input.GetKeyUp(KeyCode.Escape) && worldGenerated)
+        if ((Input.GetKeyUp(KeyCode.Escape) || Input.GetButtonUp("Start")) && worldGenerated)
         {
             demoMenu.enabled = !demoMenu.enabled;
+            EventSystem.current.sendNavigationEvents = !EventSystem.current.sendNavigationEvents;
         }
 
 	}
@@ -59,6 +63,7 @@ public class StartDemoScene : MonoBehaviour {
         }
 
         demoMenu.enabled = false;
+        EventSystem.current.sendNavigationEvents = false;
         createWorld.GenerateWorld();
         worldGenerated = true;
         startButton.interactable = false;
@@ -76,6 +81,6 @@ public class StartDemoScene : MonoBehaviour {
     {
         yield return new WaitForSeconds(1.0f);
         GameObject player = (GameObject)Instantiate(playerPrefab);
-        Camera.main.GetComponent<FollowCharacter>().character = player;
+        //Camera.main.GetComponent<SmoothFollow>().target = player;
     }
 }

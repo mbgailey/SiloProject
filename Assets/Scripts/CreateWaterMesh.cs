@@ -8,6 +8,7 @@ public class CreateWaterMesh : MonoBehaviour {
     //public Material waterSurfaceMaterial;
     public GameObject waterSidePrefab;
     public GameObject waterTopPrefab;
+    //public GameObject waterChurnParticles;
     [SerializeField]
     List<Vector3> troubleShootVerts = new List<Vector3>();
 

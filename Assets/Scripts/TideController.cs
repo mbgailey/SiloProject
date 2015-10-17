@@ -6,20 +6,21 @@ using System.Collections.Generic;
 public class TideController : MonoBehaviour {
 
     public float globalWaterElevation;
-    int currentWaterIndex = 0;
+    public int currentWaterIndex = 0;
     float highTideElev = -2.0f;
     float lowTideElev = -4.0f;
+     
 
-    float tideSpeed = 0.5f;
+    float tideSpeed = 0.25f;
     public bool tideIn = true;
     public bool tideEligible = true;
 
     int meshCount = 20;
-    float deltaElev;
+    public float deltaElev;
 
     public List<WaterController> AllWaterControllers = new List<WaterController>();
 
-    public float[] waterMeshElevList;
+    public float[] waterMeshElevList;   //Array of elevations starting with highest water level and ending with lowest water level
 
 	// Use this for initialization
 	void Start () {
@@ -67,15 +68,17 @@ public class TideController : MonoBehaviour {
 
             for (int i = currentWaterIndex + 1; i < meshCount; i++)
             {
-                //Find first elevation in list that water level is greater than
-                if (globalWaterElevation > waterMeshElevList[i])
+                //If global water elevation is less than a new water mesh elevation
+                if (globalWaterElevation < waterMeshElevList[i] )   //When global level passes a demarcation on the elevation list
                 {
-                    if (currentWaterIndex != i)
+                    if (currentWaterIndex != i) //If this is a new index then set final position of current mesh and switch to a different water mesh
                     {
-                        currentWaterIndex = i - 1;
+                        
+                        currentWaterIndex = i;
                         foreach (WaterController controller in AllWaterControllers)
                         {
-                            controller.SetTideIndex(currentWaterIndex);
+                            //controller.SetFinalPosition(waterMeshElevList[i]);  //Move to final position
+                            controller.SetTideIndexOut(currentWaterIndex); //Set next active water mesh
                         }
                     }
                     break;
@@ -106,17 +109,17 @@ public class TideController : MonoBehaviour {
                 controller.MoveWaterBy(delta);
             }
 
-            for (int i = currentWaterIndex; i >= 0; i--)
+            for (int i = currentWaterIndex; i > 0; i--)
             {
                 //Find first elevation in list that water level is less than
-                if (globalWaterElevation < waterMeshElevList[i])
+                if (globalWaterElevation > waterMeshElevList[i])  //Each mesh is at appx the next elevation on the list because they have been moved down during tide out
                 {
-                    if (currentWaterIndex != i)
+                    if (currentWaterIndex != i-1)
                     {
-                        currentWaterIndex = i + 1;
+                        currentWaterIndex = i-1;
                         foreach (WaterController controller in AllWaterControllers)
                         {
-                            controller.SetTideIndex(currentWaterIndex);
+                            controller.SetTideIndexIn(currentWaterIndex);
                         }
                     }
                     break;
