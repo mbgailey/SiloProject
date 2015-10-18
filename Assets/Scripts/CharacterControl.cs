@@ -12,6 +12,7 @@ public class CharacterControl : MonoBehaviour
 	public float groundDamping = 20f; // how fast do we change direction? higher means faster
 	public float inAirDamping = 5f;
 	public float jumpHeight = 3f;
+    public float jumpForward = 10f;
 
     float jumpCooldownTime = 0.15f;
     bool jumpEligible = true;
@@ -232,6 +233,7 @@ public class CharacterControl : MonoBehaviour
         if ((_controller.isGrounded && j && jumpEligible) || (surfaced && j && jumpEligible))
 		{
 			_velocity.y = Mathf.Sqrt( 2f * jumpHeight * -gravity );
+            _velocity.x += jumpForward * h;
             jumping = true;
             jumpEligible = false;
             running = false;
