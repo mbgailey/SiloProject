@@ -44,6 +44,7 @@ public class CharacterControl : MonoBehaviour
     float swimmingBuffer = 0.1f;
 
     TideController tideController;
+    PlayerLungs lungsController;
 
 	void Awake()
 	{
@@ -58,6 +59,7 @@ public class CharacterControl : MonoBehaviour
 
         Vector3 globalPos = rb.position;
         tideController = GameObject.FindGameObjectWithTag("GameController").GetComponent<TideController>();
+        lungsController = this.GetComponent<PlayerLungs>();
 	}
 
 
@@ -160,14 +162,14 @@ public class CharacterControl : MonoBehaviour
             //Debug.Log("SWIMMING");
             swimming = true;
             jumping = false;
-
+            //lungsController.submerged = true;
         }
         else if (swimming && globalPos.y > waterElevation - swimmingBuffer)
         {
             //Debug.Log("NOT SWIMMING");
             swimming = false;
             jumping = false;
-
+            //lungsController.submerged = false;
         }
 
         if (globalPos.y > waterElevation - swimmingBuffer * 2f && globalPos.y < waterElevation + swimmingBuffer) //Surfaced
@@ -175,11 +177,27 @@ public class CharacterControl : MonoBehaviour
             //Debug.Log("Surfaced");
             //jumpEligible = true;
             surfaced = true;
-
+            //lungsController.submerged = false;
         }
         else
         {
             surfaced = false;
+        }
+
+        if (swimming)
+        {
+            if (!surfaced)
+            {
+                lungsController.submerged = true;
+            }
+            else
+            {
+                lungsController.submerged = false;
+            }
+        }
+        else
+        {
+            lungsController.submerged = false;
         }
 
 
