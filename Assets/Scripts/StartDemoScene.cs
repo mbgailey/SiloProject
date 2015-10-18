@@ -13,6 +13,7 @@ public class StartDemoScene : MonoBehaviour {
     public Button resetButton;
     public InputField seedInput;
     public InputField sizeInput;
+    public Text currentSeed;
 
     public GameObject playerPrefab;
 
@@ -61,13 +62,13 @@ public class StartDemoScene : MonoBehaviour {
                 createWorld.maxBranches = int.Parse(sizeInput.text);
             }
         }
-
+        
         demoMenu.enabled = false;
         EventSystem.current.sendNavigationEvents = false;
         createWorld.GenerateWorld();
         worldGenerated = true;
         startButton.interactable = false;
-
+        currentSeed.text = "Current Seed: " + createWorld.randomSeed.ToString();
         StartCoroutine(SpawnPlayer());
         
     } 

@@ -81,7 +81,8 @@ public class CreateWorld2 : MonoBehaviour {
         }
         else
         {
-            Debug.Log("Random Seed: " + Random.seed);
+            randomSeed = Random.seed;
+            Debug.Log("Random Seed: " + randomSeed);
         }
         GenerateTunnel(new Vector3(0f, 0f, 0f), 1, SelectTunnelTendency());
     }
