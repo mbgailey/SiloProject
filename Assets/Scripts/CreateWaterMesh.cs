@@ -167,7 +167,7 @@ public class CreateWaterMesh : MonoBehaviour {
     {
         int surfaceCount = surfaceList.Count / 2;   //Surface list should come with pairs of vector2s defining the top water surface
 
-        Debug.Log("SurfaceCount " + surfaceCount);
+        //Debug.Log("SurfaceCount " + surfaceCount);
         
         //Create top water surfaces
         List<Vector3> verts = new List<Vector3>();

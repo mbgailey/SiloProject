@@ -43,7 +43,7 @@ public class CreatePieceMesh : MonoBehaviour {
     List<int> verticalCurtainTris = new List<int>(); 
 
 	// Use this for initialization
-	public void InitializePiece (float ang, Vector3 start, int xDir, int yDir, float startThick, float endThick, float depth, Material biomeMat) 
+	public void InitializePiece (float ang, Vector3 start, int xDir, int yDir, float startThick, float endThick, float depth, Material biomeMat, int layer) 
     {
         angle = ang;
         startPos = start;
@@ -65,6 +65,8 @@ public class CreatePieceMesh : MonoBehaviour {
 
         CreateMeshes();
         CreateColliders(yDir);
+
+        this.gameObject.GetComponentInChildren<BoxCollider>().gameObject.layer = layer; //Needed for setting wall collider layer to "Walls" (layer = 13)
     }
 
     void CreateColliders(int yDirection)

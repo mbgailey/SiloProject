@@ -32,6 +32,9 @@ public class CharacterControl : MonoBehaviour
     private bool jumping = false;
     private bool swimming = false;
     private bool surfaced = false;
+    private bool climbing = false;
+    private bool canClimb = false;
+    private bool onLadder = false;
     private int direction = 1;
 
     float rotateSpeed = 420f;
@@ -41,7 +44,7 @@ public class CharacterControl : MonoBehaviour
 
     //int direction;
     Rigidbody rb;
-    float waterElevation;
+    float waterElevation = -20f;
     float swimmingBuffer = 0.1f;
 
     TideController tideController;
@@ -59,7 +62,7 @@ public class CharacterControl : MonoBehaviour
 		_controller.onTriggerExitEvent += onTriggerExitEvent;
 
         Vector3 globalPos = rb.position;
-        tideController = GameObject.FindGameObjectWithTag("GameController").GetComponent<TideController>();
+        /////tideController = GameObject.FindGameObjectWithTag("GameController").GetComponent<TideController>();
         lungsController = this.GetComponent<PlayerLungs>();
 	}
 
@@ -80,13 +83,27 @@ public class CharacterControl : MonoBehaviour
 	void onTriggerEnterEvent( Collider col )
 	{
 		//Debug.Log( "onTriggerEnterEvent: " + col.gameObject.name );
+        if (col.gameObject.CompareTag("Ladder"))
+        {
+            onLadder = true;
+        }
 	}
 
 
 	void onTriggerExitEvent( Collider col )
 	{
-		//Debug.Log( "onTriggerExitEvent: " + col.gameObject.name );
+		Debug.Log( "onTriggerExitEvent: " + col.gameObject.name );
+        if (col.gameObject.CompareTag("Ladder"))
+        {
+            onLadder = false;
+        }
 	}
+
+    void onTriggerStayEvent(Collider col)
+    {
+        Debug.Log( "onTriggerExitEvent: " + col.gameObject.name );
+        
+    }
 
 	#endregion
 
@@ -102,14 +119,26 @@ public class CharacterControl : MonoBehaviour
 	void Update()
 	{
         Vector3 globalPos = rb.position;
-        waterElevation = tideController.globalWaterElevation;
+        /////waterElevation = tideController.globalWaterElevation;
+
+        //onLadder = false;
 
         if (_controller.isGrounded)
         {
             _velocity.y = 0;
-            
         }
 
+        if ((_controller.isWalled || onLadder) && !swimming)
+        {
+            canClimb = true;
+        }
+        else
+        {
+            canClimb = false;
+            climbing = false;
+        }
+
+        
         if (jumping && (swimming || surfaced || _controller.isGrounded))
         {
             jumping = false;
@@ -210,15 +239,24 @@ public class CharacterControl : MonoBehaviour
         if (v > 0f)
         {
             normalizedVerticalSpeed = 1;
+            if (canClimb)
+            {
+                climbing = true;
+            }
         }
         else if (v < 0f)
         {
             normalizedVerticalSpeed = -1;
+            if (canClimb)
+            {
+                climbing = true;
+            }
         }
 
         else
         {
             normalizedVerticalSpeed = 0;
+            //climbing = false;
         }
 
 
@@ -230,7 +268,7 @@ public class CharacterControl : MonoBehaviour
         }
 
         // we can only jump whilst grounded or swimming
-        if ((_controller.isGrounded && j && jumpEligible) || (surfaced && j && jumpEligible))
+        if ((_controller.isGrounded && j && jumpEligible) || (surfaced && j && jumpEligible) || (climbing && j && jumpEligible))
 		{
 			_velocity.y = Mathf.Sqrt( 2f * jumpHeight * -gravity );
             _velocity.x += jumpForward * h;
@@ -265,24 +303,33 @@ public class CharacterControl : MonoBehaviour
 
 
 		// apply horizontal speed smoothing it. dont really do this with Lerp. Use SmoothDamp or something that provides more control
-		var smoothedMovementFactor = _controller.isGrounded ? groundDamping : inAirDamping; // how fast do we change direction?
-        if (!swimming)
+		var smoothedMovementFactor = (_controller.isGrounded || climbing) ? groundDamping : inAirDamping; // how fast do we change direction?
+        if (!swimming && !climbing)
         {
             _velocity.x = Mathf.Lerp(_velocity.x, normalizedHorizontalSpeed * runSpeed, Time.deltaTime * smoothedMovementFactor);
         }
-        else
+        else if (swimming)
         {
             _velocity.x = Mathf.Lerp(_velocity.x, normalizedHorizontalSpeed * swimSpeed, Time.deltaTime * smoothedMovementFactor);
         }
+        else if (climbing)
+        {
+            _velocity.x = Mathf.Lerp(_velocity.x, normalizedHorizontalSpeed * 0.25f, Time.deltaTime * smoothedMovementFactor);
+            _velocity.x = Mathf.Lerp(_velocity.x, 0f, Time.deltaTime * smoothedMovementFactor);
+        }
 
 		// apply gravity before moving        
-        if (!swimming)
+        if (!swimming && !climbing)
         {
             _velocity.y += gravity * Time.deltaTime;    //Apply gravity
         }
-        else
+        else if (swimming)
         {
             _velocity.y = Mathf.Lerp(_velocity.y, normalizedVerticalSpeed * swimSpeed, Time.deltaTime * smoothedMovementFactor);
+        }
+        else if (climbing)
+        {
+            _velocity.y = Mathf.Lerp(_velocity.y, normalizedVerticalSpeed * swimSpeed, Time.deltaTime * smoothedMovementFactor); //Use swim speed for climbing for now
         }
 
 		// if holding down bump up our movement amount and turn off one way platform detection for a frame.
@@ -305,5 +352,14 @@ public class CharacterControl : MonoBehaviour
         _animator.SetBool("Jumping", jumping);
         _animator.SetInteger("Direction", direction);
 	}
+
+    void OnCollisionEnter(Collision collision)
+    {
+        Debug.Log("collision!!");
+        if (collision.gameObject.layer == LayerMask.NameToLayer("Walls"))
+        {
+            Debug.Log("wall!!");
+        }
+    }
 
 }

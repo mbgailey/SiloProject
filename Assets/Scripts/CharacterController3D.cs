@@ -29,6 +29,8 @@ namespace Prime31
             public bool wasGroundedLastFrame;
             public bool movingDownSlope;
             public float slopeAngle;
+            public bool touchingWall;
+            public bool ladderStay;
 
 
             public bool hasCollision()
@@ -39,7 +41,7 @@ namespace Prime31
 
             public void reset()
             {
-                right = left = above = below = becameGroundedThisFrame = movingDownSlope = false;
+                right = left = above = below = becameGroundedThisFrame = movingDownSlope = touchingWall = ladderStay = false;
                 slopeAngle = 0f;
             }
 
@@ -152,6 +154,10 @@ namespace Prime31
         [NonSerialized]
         public Vector3 velocity;
         public bool isGrounded { get { return collisionState.below; } }
+        public bool isWalled { get { return collisionState.touchingWall; } }
+        public bool isLadder { get { return collisionState.ladderStay; } }
+        //public bool isWallRight { get { return collisionState.right; } }
+        //public bool isWallLeft { get { return collisionState.left; } }
 
         const float kSkinWidthFloatFudgeFactor = 0.001f;
 
@@ -421,7 +427,12 @@ namespace Prime31
         {
             // disregard 90 degree angles (walls)
             if (Mathf.RoundToInt(angle) == 90)
+            {
+                //Debug.Log("WALL Hit");
+                collisionState.touchingWall = true;
                 return false;
+            }            
+                
 
             // if we can walk on slopes and our angle is small enough we need to move up
             if (angle < slopeLimit)

@@ -11,7 +11,8 @@ public class CreateWorld2 : MonoBehaviour {
     GameObject floorObj;
     GameObject ceilingObj;
     float pieceLength = 1f;
-    public LayerMask terrainLayer;
+    public LayerMask terrainLayer;  //For floor and ceilings
+    public LayerMask wallLayer;     //For climbable walls
     enum TunnelTendency { up, down, normal };
 
     ////Shaft Variables and Objects////
@@ -347,7 +348,7 @@ public class CreateWorld2 : MonoBehaviour {
                 Vector3 objLoc = new Vector3(floorStartPos.x + pieceLength / 2f * direction, (floorStartPos.y + floorEndPos.y) / 2f, 0f);
                 Vector3 meshStart = new Vector3(-pieceLength / 2f * direction, (floorStartPos.y - floorEndPos.y) / 2f, 0f);
                 floorObj = (GameObject)Instantiate(tunnelPiecePrefab, objLoc, Quaternion.identity);
-                floorObj.GetComponent<CreatePieceMesh>().InitializePiece(floorAngle, meshStart, direction, -1, pieceThickness, pieceThickness, 2.0f, biomeMat);
+                floorObj.GetComponent<CreatePieceMesh>().InitializePiece(floorAngle, meshStart, direction, -1, pieceThickness, pieceThickness, 2.0f, biomeMat, 9);
                 //Renderer[] rendArray = floorObj.gameObject.GetComponentsInChildren<Renderer>();
                 //foreach (Renderer rend in rendArray)
                 //{
@@ -371,7 +372,7 @@ public class CreateWorld2 : MonoBehaviour {
                 Vector3 objLoc = new Vector3(ceilingStartPos.x + pieceLength / 2f * direction, (ceilingStartPos.y + ceilingEndPos.y) / 2f, 0f);
                 Vector3 meshStart = new Vector3(-pieceLength / 2f * direction, (ceilingStartPos.y - ceilingEndPos.y) / 2f, 0f);
                 ceilingObj = (GameObject)Instantiate(tunnelPiecePrefab, objLoc, Quaternion.identity);
-                ceilingObj.GetComponent<CreatePieceMesh>().InitializePiece(ceilingAngle, meshStart, direction, 1, pieceThickness, pieceThickness, 2.0f, biomeMat);
+                ceilingObj.GetComponent<CreatePieceMesh>().InitializePiece(ceilingAngle, meshStart, direction, 1, pieceThickness, pieceThickness, 2.0f, biomeMat, 9);
                 //Renderer[] rendArray = ceilingObj.gameObject.GetComponentsInChildren<Renderer>();
                 //foreach (Renderer rend in rendArray)
                 //{
@@ -421,7 +422,7 @@ public class CreateWorld2 : MonoBehaviour {
                 rotation = 90f;
             }
             GameObject thisObj = (GameObject)Instantiate(tunnelPiecePrefab, objLoc, Quaternion.identity);
-            thisObj.GetComponent<CreatePieceMesh>().InitializePiece(0f, meshStart, 1, 1, 0.2f, 0.2f, 2.0f, biomeMat);    //Create a 0 degree piece with direction of 1 that will be turned by 90 degrees to become vertical piece
+            thisObj.GetComponent<CreatePieceMesh>().InitializePiece(0f, meshStart, 1, 1, 0.2f, 0.2f, 2.0f, biomeMat, 13);    //Create a 0 degree piece with direction of 1 that will be turned by 90 degrees to become vertical piece
             //Renderer[] rendArray = thisObj.gameObject.GetComponentsInChildren<Renderer>();
             //foreach (Renderer rend in rendArray)
             //{
@@ -587,7 +588,7 @@ public class CreateWorld2 : MonoBehaviour {
             {
                 Vector3 meshStart = new Vector3(-pieceLength / 2f, 0, 0f); //Mesh start is relative to instantiated object
                 GameObject thisObj = (GameObject)Instantiate(tunnelPiecePrefab, leftObjPos, Quaternion.identity);
-                thisObj.GetComponent<CreatePieceMesh>().InitializePiece(0f, meshStart, 1, -1, 0.2f, 0.2f, 2.0f, biomeMat);    //Create a 0 degree piece with direction of 1 that will be turned by 90 degrees to become vertical piece
+                thisObj.GetComponent<CreatePieceMesh>().InitializePiece(0f, meshStart, 1, -1, 0.2f, 0.2f, 2.0f, biomeMat, 13);    //Create a 0 degree piece with direction of 1 that will be turned by 90 degrees to become vertical piece
                 //Renderer[] rendArray = thisObj.gameObject.GetComponentsInChildren<Renderer>();
                 //foreach (Renderer rend in rendArray)
                 //{
@@ -614,7 +615,7 @@ public class CreateWorld2 : MonoBehaviour {
 
                 Vector3 meshStart = new Vector3(-pieceLength / 2f, 0, 0f); //Mesh start is relative to instantiated object
                 GameObject thisObj = (GameObject)Instantiate(tunnelPiecePrefab, rightObjPos, Quaternion.identity);
-                thisObj.GetComponent<CreatePieceMesh>().InitializePiece(0f, meshStart, 1, -1, 0.2f, 0.2f, 2.0f, biomeMat);    //Create a 0 degree piece with direction of 1 that will be turned by 90 degrees to become vertical piece
+                thisObj.GetComponent<CreatePieceMesh>().InitializePiece(0f, meshStart, 1, -1, 0.2f, 0.2f, 2.0f, biomeMat, 13);    //Create a 0 degree piece with direction of 1 that will be turned by 90 degrees to become vertical piece
                 //Renderer[] rendArray = thisObj.gameObject.GetComponentsInChildren<Renderer>();
                 //foreach (Renderer rend in rendArray)
                 //{
@@ -653,7 +654,7 @@ public class CreateWorld2 : MonoBehaviour {
                 }
                 Vector3 meshStart = new Vector3(-pieceLength / 2f * horizDir, 0, 0f); //Mesh start is relative to instantiated object
                 GameObject thisObj = (GameObject)Instantiate(tunnelPiecePrefab, endPos, Quaternion.identity);
-                thisObj.GetComponent<CreatePieceMesh>().InitializePiece(0f, meshStart, horizDir, pieceVertDir, 0.2f, 0.2f, 2.0f, biomeMat);    //Create a 0 degree piece with direction of 1 that will be turned by 90 degrees to become vertical piece
+                thisObj.GetComponent<CreatePieceMesh>().InitializePiece(0f, meshStart, horizDir, pieceVertDir, 0.2f, 0.2f, 2.0f, biomeMat, 13);    //Create a 0 degree piece with direction of 1 that will be turned by 90 degrees to become vertical piece
                 //Renderer[] rendArray = thisObj.gameObject.GetComponentsInChildren<Renderer>();
                 //foreach (Renderer rend in rendArray)
                 //{
