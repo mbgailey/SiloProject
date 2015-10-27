@@ -62,7 +62,7 @@ public class CharacterControl : MonoBehaviour
 		_controller.onTriggerExitEvent += onTriggerExitEvent;
 
         Vector3 globalPos = rb.position;
-        /////tideController = GameObject.FindGameObjectWithTag("GameController").GetComponent<TideController>();
+        tideController = GameObject.FindGameObjectWithTag("GameController").GetComponent<TideController>();
         lungsController = this.GetComponent<PlayerLungs>();
 	}
 
@@ -119,7 +119,7 @@ public class CharacterControl : MonoBehaviour
 	void Update()
 	{
         Vector3 globalPos = rb.position;
-        /////waterElevation = tideController.globalWaterElevation;
+        waterElevation = tideController.globalWaterElevation;
 
         //onLadder = false;
 
@@ -128,7 +128,8 @@ public class CharacterControl : MonoBehaviour
             _velocity.y = 0;
         }
 
-        if ((_controller.isWalled || onLadder) && !swimming)
+        ////if ((_controller.isWalled || onLadder) && !swimming)
+        if (onLadder && !swimming)
         {
             canClimb = true;
         }
